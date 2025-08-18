@@ -104,6 +104,10 @@ endif
 
 deps = []
 deps += dependency('threads')
+deps += dependency('Qt6Core')
+deps += dependency('Qt6Gui')
+deps += dependency('Qt6Widgets')
+deps += dependency('Qt6Charts')
 
 if host_machine.system() == 'windows'
 	deps += cxx.find_library('ws2_32')

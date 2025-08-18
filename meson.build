@@ -21,6 +21,8 @@ srcs = [
 	'deps/LibNaegCommon/LibDspc.cpp',
 	'src/main.cpp',
 	'src/SimonSupervising.cpp',
+	'src/MsgDispatching.cpp',
+	'src/GuiInteracting.cpp',
 ]
 
 # Arguments

@@ -27,6 +27,7 @@
 #define SIMON_SUPERVISING_H
 
 #include "Processing.h"
+#include "MsgDispatching.h"
 
 class SimonSupervising : public Processing
 {
@@ -55,10 +56,15 @@ private:
 
 	/* member functions */
 	Success process();
+	Success shutdown();
 	void processInfo(char *pBuf, char *pBufEnd);
+
+	bool servicesStart();
 
 	/* member variables */
 	//uint32_t mStartMs;
+	uint32_t mStateSd;
+	MsgDispatching *mpApp;
 
 	/* static functions */
 

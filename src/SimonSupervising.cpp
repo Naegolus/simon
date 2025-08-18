@@ -23,12 +23,20 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#if defined(__linux__)
+#include <unistd.h>
+#include <signal.h>
+#endif
+
 #include "SimonSupervising.h"
+#include "SystemDebugging.h"
+#include "LibFilesys.h"
+
+#include "env.h"
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
 		gen(StMain) \
-		gen(StNop) \
 
 #define dGenProcStateEnum(s) s,
 dProcessStateEnum(ProcState);
@@ -38,11 +46,33 @@ dProcessStateEnum(ProcState);
 dProcessStateStr(ProcState);
 #endif
 
+#define dForEach_SdState(gen) \
+		gen(StSdStart) \
+		gen(StSdAppDoneWait) \
+
+#define dGenSdStateEnum(s) s,
+dProcessStateEnum(SdState);
+
+#if 0
+#define dGenSdStateString(s) #s,
+dProcessStateStr(SdState);
+#endif
+
 using namespace std;
+
+#if defined(__linux__)
+static Processing *pTreeRoot = NULL;
+static char nameApp[16];
+static char nameFileProc[64];
+static char buffProcTree[2*1024*1024];
+static bool procTreeSaveInProgress = false;
+#endif
 
 SimonSupervising::SimonSupervising()
 	: Processing("SimonSupervising")
 	//, mStartMs(0)
+	, mStateSd(StSdStart)
+	, mpApp(NULL)
 {
 	mState = StStart;
 }
@@ -54,6 +84,7 @@ Success SimonSupervising::process()
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
 	//Success success;
+	bool ok;
 #if 0
 	dStateTrace;
 #endif
@@ -61,13 +92,14 @@ Success SimonSupervising::process()
 	{
 	case StStart:
 
+		ok = servicesStart();
+		if (!ok)
+			return procErrLog(-1, "could not start services");
+
 		mState = StMain;
 
 		break;
 	case StMain:
-
-		break;
-	case StNop:
 
 		break;
 	default:
@@ -75,6 +107,153 @@ Success SimonSupervising::process()
 	}
 
 	return Pending;
+}
+
+Success SimonSupervising::shutdown()
+{
+	switch (mStateSd)
+	{
+	case StSdStart:
+
+		cancel(mpApp);
+
+		mStateSd = StSdAppDoneWait;
+
+		break;
+	case StSdAppDoneWait:
+
+		if (mpApp->progress())
+			break;
+
+		return Positive;
+
+		break;
+	default:
+		break;
+	}
+
+	return Pending;
+}
+
+#if defined(__linux__)
+static void procTreeSave()
+{
+	time_t now;
+	FILE *pFile;
+	int res;
+	size_t lenReq, lenDone;
+	string strTime;
+
+	if (procTreeSaveInProgress)
+		return;
+	procTreeSaveInProgress = true;
+
+	now = time(NULL);
+
+	if (!pTreeRoot)
+	{
+		wrnLog("process tree root not defined");
+		return;
+	}
+
+	*buffProcTree = 0;
+
+	pTreeRoot->processTreeStr(
+		buffProcTree,
+		buffProcTree + sizeof(buffProcTree),
+		true,
+		true);
+
+	strTime = to_string(now);
+	res = snprintf(nameFileProc, sizeof(nameFileProc),
+			"%s_%s_tree-proc.txt",
+			strTime.c_str(),
+			nameApp);
+	if (res < 0)
+	{
+		wrnLog("could not create process tree file name");
+		return;
+	}
+
+	pFile = fopen(nameFileProc, "w");
+	if (!pFile)
+	{
+		wrnLog("could not open process tree file");
+		return;
+	}
+
+	lenReq = strlen(buffProcTree);
+	lenDone = fwrite(buffProcTree, 1, lenReq, pFile);
+
+	fclose(pFile);
+
+	if (lenDone != lenReq)
+	{
+		wrnLog("error writing to process tree file");
+		return;
+	}
+}
+
+// - https://man7.org/linux/man-pages/man5/core.5.html
+// - https://man7.org/linux/man-pages/man7/signal.7.html
+// - https://man7.org/linux/man-pages/man3/abort.3.html
+void coreDumpRequest(int signum)
+{
+	wrnLog("Got signal: %d", signum);
+
+	if (signum != SIGABRT)
+	{
+		wrnLog("Requesting core dump");
+		abort();
+
+		return;
+	}
+
+	wrnLog("Creating process tree file");
+	procTreeSave();
+}
+#endif
+
+bool SimonSupervising::servicesStart()
+{
+#if defined(__linux__)
+	bool ok;
+
+	if (env.coreDump)
+	{
+		procWrnLog("enable core dumps");
+
+		signal(SIGABRT, coreDumpRequest);
+
+		ok = coreDumpsEnable(coreDumpRequest);
+		if (!ok)
+			procWrnLog("could not enable core dumps");
+	}
+#endif
+	SystemDebugging *pDbg;
+
+	pDbg = SystemDebugging::create(this);
+	if (!pDbg)
+	{
+		procWrnLog("could not create process");
+		return false;
+	}
+
+	pDbg->listenLocalSet();
+
+	pDbg->procTreeDisplaySet(false);
+	start(pDbg);
+
+	mpApp = MsgDispatching::create();
+	if (!mpApp)
+	{
+		procWrnLog("could not create process");
+		return false;
+	}
+
+	start(mpApp);
+
+	return true;
 }
 
 void SimonSupervising::processInfo(char *pBuf, char *pBufEnd)

@@ -52,6 +52,8 @@ ChapThreeModeling::ChapThreeModeling()
 	, mpChallenger(NULL)
 	, mStrategyLeader()
 	, mStrategyChallenger()
+	, mpCoalition(NULL)
+	, mpLaw(NULL)
 {
 	mState = StStart;
 }
@@ -89,6 +91,9 @@ Success ChapThreeModeling::process()
 		challengerSet();
 		strategyCreate(&mStrategyLeader);
 		strategyCreate(&mStrategyChallenger);
+		newLeaderVote();
+		lawEnact();
+		resultsDevelop();
 
 		mState = StMain;
 
@@ -186,6 +191,34 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	procInfLog("    Policies");
 	procInfLog("      Private goods     %.3f", pProp->policies.goodsPrivate_g);
 	procInfLog("      Public goods      %.3f", pProp->policies.goodsPublic_x);
+}
+
+void ChapThreeModeling::newLeaderVote()
+{
+}
+
+void ChapThreeModeling::lawEnact()
+{
+	mpCoalition = &mStrategyLeader.coalition;
+	mpLaw = &mStrategyLeader.proposal;
+}
+
+void ChapThreeModeling::resultsDevelop()
+{
+	double leisure = 1 / (2 - mpLaw->rateTax_r);
+	double effort = 1 - leisure;
+	procInfLog("Effort             %10.3f", effort);
+
+	double activityEconomic = mNumCitizen * effort;
+	procInfLog("Economic activity  %10.3f", activityEconomic);
+
+	double revenues = mpLaw->rateTax_r * activityEconomic;
+	procInfLog("Gov. revenues      %10.3f", revenues);
+
+	double p = 0.2;
+	double costs = mpLaw->policies.goodsPublic_x * p +
+				mpLaw->policies.goodsPrivate_g * mpCoalition->size();
+	procInfLog("Gov. costs         %10.3f", costs);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

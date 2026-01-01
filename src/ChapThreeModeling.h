@@ -94,6 +94,9 @@ private:
 	void selectorsCreate();
 	void challengerSet();
 	void strategyCreate(Strategy *pStrategy);
+	void newLeaderVote();
+	void lawEnact();
+	void resultsDevelop();
 
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);
@@ -107,6 +110,8 @@ private:
 	Selector *mpChallenger;
 	Strategy mStrategyLeader;
 	Strategy mStrategyChallenger;
+	std::list<Selector *> *mpCoalition;
+	Proposal *mpLaw;
 
 	/* static functions */
 

@@ -71,13 +71,17 @@ private:
 	void processInfo(char *pBuf, char *pBufEnd);
 
 	void selectorsCreate();
+	void challengerSet();
 	void selectorsPick(std::list<Selector *> *winningCoalition);
 
+	Selector *randomSelGet();
 	uint32_t randomGet(uint32_t nMax);
 
 	/* member variables */
 	//uint32_t mStartMs;
 	std::vector<Selector> mSelectors;
+	Selector *mpLeader;
+	Selector *mpChallenger;
 	std::list<Selector *> mWl;
 	std::list<Selector *> mWc;
 

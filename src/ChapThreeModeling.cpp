@@ -49,6 +49,8 @@ ChapThreeModeling::ChapThreeModeling()
 	, mNumSelectorate(50)
 	, mNumWinning(10)
 	, mSelectors()
+	, mpLeader(NULL)
+	, mpChallenger(NULL)
 	, mWl()
 	, mWc()
 {
@@ -79,6 +81,7 @@ Success ChapThreeModeling::process()
 		procInfLog("Size of winning coalition  (W)      %u", mNumWinning);
 
 		selectorsCreate();
+		challengerSet();
 
 		selectorsPick(&mWl);
 		selectorsPick(&mWc);
@@ -116,6 +119,13 @@ void ChapThreeModeling::selectorsCreate()
 
 		mSelectors.push_back(sel);
 	}
+
+	mpLeader = randomSelGet();
+}
+
+void ChapThreeModeling::challengerSet()
+{
+	while (mpChallenger = randomSelGet(), mpChallenger == mpLeader);
 }
 
 void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
@@ -128,11 +138,11 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 
 	bool isLeader = pWinningCoalition == &mWl;
 
-	procInfLog("%s picks selectors for winning coalition %s",
+	procInfLog("%s (%u) picks selectors for winning coalition %s",
 				isLeader ? "Leader" : "Challenger",
+				isLeader ? mpLeader->id : mpChallenger->id,
 				isLeader ? "(Wl)" : "(Wc)");
 
-	uint32_t idx;
 	Selector *pSel;
 	bool *pChosen;
 
@@ -140,10 +150,7 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 
 	while (pWinningCoalition->size() < mNumWinning)
 	{
-		idx = randomGet(mNumSelectorate - 1);
-		//procInfLog("random idx = %u", idx);
-
-		pSel = &mSelectors[idx];
+		pSel = randomSelGet();
 
 		pChosen = isLeader ? &pSel->chosenByLeader : &pSel->chosenByChallenger;
 
@@ -153,11 +160,19 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 			continue;
 		}
 
+		if (pSel == mpLeader || pSel == mpChallenger)
+			continue;
+
 		*pChosen = true;
 		pWinningCoalition->push_back(pSel);
-		procInfLog("%2u.: %3u", pWinningCoalition->size(), pSel->id);
+		procInfLog("%2u.  %3u", pWinningCoalition->size(), pSel->id);
 
 	}
+}
+
+ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()
+{
+	return &mSelectors[randomGet(mNumSelectorate - 1)];
 }
 
 uint32_t ChapThreeModeling::randomGet(uint32_t nMax)

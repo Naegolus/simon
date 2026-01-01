@@ -82,9 +82,10 @@ Success ChapThreeModeling::process()
 		if (!mNumCitizen || !mNumSelectorate || !mNumWinning)
 			return procErrLog(-1, "invalid arguments");
 
-		procInfLog("Size of winning coalition  (W)      %u", mNumWinning);
-		procInfLog("Size of selectorate        (S)      %u", mNumSelectorate);
-		procInfLog("Number of citizens         (N)      %u", mNumCitizen);
+		procInfLog("Size of winning coalition  (W)      %6u", mNumWinning);
+		procInfLog("Size of selectorate        (S)      %6u", mNumSelectorate);
+		procInfLog("Number of citizens         (N)      %6u", mNumCitizen);
+		procInfLog("Loyalty norm               (W/S)    %10.3f", (float)mNumWinning / mNumSelectorate);
 
 		selectorsCreate();
 

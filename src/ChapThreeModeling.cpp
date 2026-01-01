@@ -48,6 +48,7 @@ ChapThreeModeling::ChapThreeModeling()
 	, mNumCitizen(1000)
 	, mNumSelectorate(50)
 	, mNumWinning(10)
+	, mDelta(0)
 	, mRng(random_device{}())
 	, mSelectors()
 	, mpLeader(NULL)
@@ -84,10 +85,10 @@ Success ChapThreeModeling::process()
 		if (!mNumCitizen || !mNumSelectorate || !mNumWinning)
 			return procErrLog(-1, "invalid arguments");
 
-		procInfLog("Size of winning coalition  (W)      %6u", mNumWinning);
-		procInfLog("Size of selectorate        (S)      %6u", mNumSelectorate);
-		procInfLog("Number of citizens         (N)      %6u", mNumCitizen);
-		procInfLog("Loyalty norm               (W/S)    %10.3f", (float)mNumWinning / mNumSelectorate);
+		procInfLog("Size of winning coalition    (W)      %6u", mNumWinning);
+		procInfLog("Size of selectorate          (S)      %6u", mNumSelectorate);
+		procInfLog("Number of citizens           (N)      %6u", mNumCitizen);
+		procInfLog("Loyalty norm                 (W/S)    %10.3f", (double)mNumWinning / mNumSelectorate);
 
 		selectorsCreate();
 
@@ -154,8 +155,6 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 				isLeader ? "Leader" : "Challenger",
 				isLeader ? mpLeader->id : mpChallenger->id);
 
-	procInfLog("  Assemble coalition");
-
 	list<Selector *> *pCoal = &pStrategy->coalition;
 	Selector *pSel;
 	bool *pChosen;
@@ -182,6 +181,17 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 		//procInfLog("%2u.  %3u", pCoal->size(), pSel->id);
 	}
 
+	list<Selector *>::iterator iSel = pCoal->begin();
+	char buf[64];
+	char *pBuf = buf, *pBufEnd = buf + sizeof(buf);
+
+	*pBuf = 0;
+
+	for (uint8_t i = 0; i < 4; ++i, ++iSel)
+		dInfo("%u,", (*iSel)->id);
+
+	procInfLog("  Assemble coalition {%s...}", buf);
+
 	procInfLog("  Creating proposal for policies");
 
 	Policies *pProp = &pStrategy->proposal;
@@ -190,13 +200,41 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	pProp->goodsPrivate_g = randomDouble();
 	pProp->goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate               %.3f", pProp->rateTax_r);
-	procInfLog("    Private goods          %.3f", pProp->goodsPrivate_g);
-	procInfLog("    Public goods           %.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate                 %.3f", pProp->rateTax_r);
+	procInfLog("    Private goods            %.3f", pProp->goodsPrivate_g);
+	procInfLog("    Public goods             %.3f", pProp->goodsPublic_x);
 }
 
 void ChapThreeModeling::newLeaderVote()
 {
+	double payoffFromLeader = payoffFrom(&mStrategyLeader);
+	procInfLog("Payoff from leader           %.3f", payoffFromLeader);
+
+	double payoffFromChallenger = payoffFrom(&mStrategyChallenger);
+	procInfLog("Payoff from challenger       %.3f", payoffFromChallenger);
+}
+
+double ChapThreeModeling::payoffFrom(Strategy *pStrategy)
+{
+	if (!pStrategy)
+	{
+		procWrnLog("could not get payoff");
+		return 0.0;
+	}
+
+	bool isLeader = pStrategy == &mStrategyLeader;
+
+	Policies *pProp = &pStrategy->proposal;
+
+	double leisure = 1 / (2 - pProp->rateTax_r);
+	double effort = 1 - leisure;
+	double loyaltyNorm = (double)mNumWinning / mNumSelectorate;
+
+	if (isLeader)
+		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) / (1 - mDelta);
+
+	return (utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) * loyaltyNorm +
+			utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) * (1 - loyaltyNorm)) / (1 - mDelta);
 }
 
 void ChapThreeModeling::lawEnact()
@@ -209,24 +247,24 @@ void ChapThreeModeling::resultsDevelop()
 {
 	double leisure = 1 / (2 - mpLaw->rateTax_r);
 	double effort = 1 - leisure;
-	procInfLog("Effort                %10.3f", effort);
+	procInfLog("Effort                  %10.3f", effort);
 
 	double payoffDisenf = utility(mpLaw->goodsPublic_x, 0, (1 - mpLaw->rateTax_r) * effort, leisure);
-	procInfLog("Disenfranchised pay.  %10.3f", payoffDisenf);
+	procInfLog("Payoff disenfranchized  %10.3f", payoffDisenf);
 
 	double activityEconomic = mNumCitizen * effort;
-	procInfLog("Economic activity     %10.3f", activityEconomic);
+	procInfLog("Economic activity       %10.3f", activityEconomic);
 
 	double revenues = mpLaw->rateTax_r * activityEconomic;
-	procInfLog("Gov. revenues         %10.3f", revenues);
+	procInfLog("Gov. revenues           %10.3f", revenues);
 
 	double p = 0.2;
 	double costs = mpLaw->goodsPublic_x * p +
 				mpLaw->goodsPrivate_g * mpCoalition->size();
-	procInfLog("Gov. costs            %10.3f", costs);
+	procInfLog("Gov. costs              %10.3f", costs);
 
 	double payoffLeader = revenues - costs;
-	procInfLog("Leader payoff         %10.3f", payoffLeader);
+	procInfLog("Payoff leader           %10.3f", payoffLeader);
 }
 
 double ChapThreeModeling::utility(double goodsPublic_x,

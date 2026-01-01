@@ -76,9 +76,9 @@ Success ChapThreeModeling::process()
 		if (!mNumCitizen || !mNumSelectorate || !mNumWinning)
 			return procErrLog(-1, "invalid arguments");
 
-		procInfLog("Number of citizens         (N)      %u", mNumCitizen);
-		procInfLog("Size of selectorate        (S)      %u", mNumSelectorate);
 		procInfLog("Size of winning coalition  (W)      %u", mNumWinning);
+		procInfLog("Size of selectorate        (S)      %u", mNumSelectorate);
+		procInfLog("Number of citizens         (N)      %u", mNumCitizen);
 
 		selectorsCreate();
 		challengerSet();
@@ -165,8 +165,7 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 
 		*pChosen = true;
 		pWinningCoalition->push_back(pSel);
-		procInfLog("%2u.  %3u", pWinningCoalition->size(), pSel->id);
-
+		//procInfLog("%2u.  %3u", pWinningCoalition->size(), pSel->id);
 	}
 }
 

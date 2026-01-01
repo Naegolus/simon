@@ -5,9 +5,9 @@
   Author(s):
       - Johannes Natter, office@dsp-crowd.com
 
-  File created on 18.08.2025
+  File created on 01.01.2026
 
-  Copyright (C) 2025, Johannes Natter
+  Copyright (C) 2026, Johannes Natter
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "MsgDispatching.h"
+#include "ChapThreeModeling.h"
 
 #define dForEach_ProcState(gen) \
 		gen(StStart) \
@@ -40,17 +40,16 @@ dProcessStateStr(ProcState);
 
 using namespace std;
 
-MsgDispatching::MsgDispatching()
-	: Processing("MsgDispatching")
+ChapThreeModeling::ChapThreeModeling()
+	: Processing("ChapThreeModeling")
 	//, mStartMs(0)
-	, mpThree(NULL)
 {
 	mState = StStart;
 }
 
 /* member functions */
 
-Success MsgDispatching::process()
+Success ChapThreeModeling::process()
 {
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
@@ -62,11 +61,7 @@ Success MsgDispatching::process()
 	{
 	case StStart:
 
-		mpThree = ChapThreeModeling::create();
-		if (!mpThree)
-			return procErrLog(-1, "could not create process");
-
-		start(mpThree);
+		procInfLog("Modelling chapter three.");
 
 		mState = StMain;
 
@@ -84,7 +79,7 @@ Success MsgDispatching::process()
 	return Pending;
 }
 
-void MsgDispatching::processInfo(char *pBuf, char *pBufEnd)
+void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)
 {
 #if 1
 	dInfo("State\t\t\t%s\n", ProcStateString[mState]);

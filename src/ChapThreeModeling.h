@@ -5,9 +5,9 @@
   Author(s):
       - Johannes Natter, office@dsp-crowd.com
 
-  File created on 18.08.2025
+  File created on 01.01.2026
 
-  Copyright (C) 2025, Johannes Natter
+  Copyright (C) 2026, Johannes Natter
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -23,31 +23,30 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MSG_DISPATCHING_H
-#define MSG_DISPATCHING_H
+#ifndef CHAP_THREE_MODELING_H
+#define CHAP_THREE_MODELING_H
 
 #include "Processing.h"
-#include "ChapThreeModeling.h"
 
-class MsgDispatching : public Processing
+class ChapThreeModeling : public Processing
 {
 
 public:
 
-	static MsgDispatching *create()
+	static ChapThreeModeling *create()
 	{
-		return new dNoThrow MsgDispatching;
+		return new dNoThrow ChapThreeModeling;
 	}
 
 protected:
 
-	virtual ~MsgDispatching() {}
+	virtual ~ChapThreeModeling() {}
 
 private:
 
-	MsgDispatching();
-	MsgDispatching(const MsgDispatching &) = delete;
-	MsgDispatching &operator=(const MsgDispatching &) = delete;
+	ChapThreeModeling();
+	ChapThreeModeling(const ChapThreeModeling &) = delete;
+	ChapThreeModeling &operator=(const ChapThreeModeling &) = delete;
 
 	/*
 	 * Naming of functions:  objectVerb()
@@ -60,7 +59,6 @@ private:
 
 	/* member variables */
 	//uint32_t mStartMs;
-	ChapThreeModeling *mpThree;
 
 	/* static functions */
 

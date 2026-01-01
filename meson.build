@@ -23,6 +23,7 @@ srcs = [
 	'src/SimonSupervising.cpp',
 	'src/MsgDispatching.cpp',
 	'src/GuiInteracting.cpp',
+	'src/ChapThreeModeling.cpp',
 ]
 
 # Arguments

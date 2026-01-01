@@ -221,6 +221,9 @@ void ChapThreeModeling::resultsDevelop()
 	double costs = mpLaw->goodsPublic_x * p +
 				mpLaw->goodsPrivate_g * mpCoalition->size();
 	procInfLog("Gov. costs         %10.3f", costs);
+
+	double payoff = revenues - costs;
+	procInfLog("Leader payoff      %10.3f", payoff);
 }
 
 double ChapThreeModeling::utility(double x, double g, double y, double l)

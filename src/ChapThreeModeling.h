@@ -93,6 +93,8 @@ private:
 	void lawEnact();
 	void resultsDevelop();
 
+	double utility(double x, double g, double y, double l);
+
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);
 	double randomDouble();

@@ -23,6 +23,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cmath>
+
 #include "ChapThreeModeling.h"
 
 #define dForEach_ProcState(gen) \
@@ -219,6 +221,11 @@ void ChapThreeModeling::resultsDevelop()
 	double costs = mpLaw->goodsPublic_x * p +
 				mpLaw->goodsPrivate_g * mpCoalition->size();
 	procInfLog("Gov. costs         %10.3f", costs);
+}
+
+double ChapThreeModeling::utility(double x, double g, double y, double l)
+{
+	return sqrt(x) + sqrt(g) + sqrt(y) + sqrt(l);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

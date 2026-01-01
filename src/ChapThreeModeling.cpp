@@ -89,7 +89,8 @@ Success ChapThreeModeling::process()
 		challengerSet();
 		selectorsPick(&mWl);
 		selectorsPick(&mWc);
-		proposalsCreate();
+		proposalCreate(&mPropLeader);
+		proposalCreate(&mPropChallenger);
 
 		mState = StMain;
 
@@ -174,9 +175,18 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 	}
 }
 
-void ChapThreeModeling::proposalsCreate()
+void ChapThreeModeling::proposalCreate(Proposal *pProp)
 {
-	procInfLog("Creating proposals");
+	if (!pProp)
+	{
+		procWrnLog("could not create proposal");
+		return;
+	}
+
+	bool isLeader = pProp == &mPropLeader;
+
+	procInfLog("Creating %s's proposal",
+				isLeader ? "leader" : "challenger");
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

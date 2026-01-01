@@ -83,7 +83,7 @@ private:
 	void selectorsCreate();
 	void challengerSet();
 	void selectorsPick(std::list<Selector *> *winningCoalition);
-	void proposalsCreate();
+	void proposalCreate(Proposal *pProp);
 
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);

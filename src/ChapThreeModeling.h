@@ -69,11 +69,16 @@ private:
 		bool chosenByChallenger;
 	};
 
+	struct Policies
+	{
+		double goodsPrivate_g;
+		double goodsPublic_x;
+	};
+
 	struct Proposal
 	{
 		double rateTax_r;
-		double goodsPrivate_g;
-		double goodsPublic_x;
+		Policies policies;
 	};
 
 	struct Strategy

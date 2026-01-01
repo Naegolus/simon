@@ -179,12 +179,13 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	Proposal *pProp = &pStrategy->proposal;
 
 	pProp->rateTax_r = randomDouble();
-	pProp->goodsPrivate_g = randomDouble();
-	pProp->goodsPublic_x = randomDouble();
+	pProp->policies.goodsPrivate_g = randomDouble();
+	pProp->policies.goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate          %.3f", pProp->rateTax_r);
-	procInfLog("    Private goods     %.3f", pProp->goodsPrivate_g);
-	procInfLog("    Public goods      %.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate            %.3f", pProp->rateTax_r);
+	procInfLog("    Policies");
+	procInfLog("      Private goods     %.3f", pProp->policies.goodsPrivate_g);
+	procInfLog("      Public goods      %.3f", pProp->policies.goodsPublic_x);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

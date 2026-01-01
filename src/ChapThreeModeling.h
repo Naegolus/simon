@@ -27,6 +27,7 @@
 #define CHAP_THREE_MODELING_H
 
 #include <vector>
+#include <random>
 
 #include "Processing.h"
 
@@ -43,6 +44,8 @@ public:
 	uint32_t mNumCitizen;
 	uint16_t mNumSelectorate;
 	uint8_t mNumWinning;
+
+	void seedSet(uint32_t seed);
 
 protected:
 
@@ -66,6 +69,13 @@ private:
 		bool chosenByChallenger;
 	};
 
+	struct Proposal
+	{
+		double rateTax_r;
+		double goodsPublic_x;
+		double goodsPrivate_g;
+	};
+
 	/* member functions */
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
@@ -73,17 +83,22 @@ private:
 	void selectorsCreate();
 	void challengerSet();
 	void selectorsPick(std::list<Selector *> *winningCoalition);
+	void proposalsCreate();
 
 	Selector *randomSelGet();
-	uint32_t randomGet(uint32_t nMax);
+	uint32_t randomInt(uint32_t nMax);
+	double randomDouble();
 
 	/* member variables */
 	//uint32_t mStartMs;
+	std::mt19937 mRng;
 	std::vector<Selector> mSelectors;
 	Selector *mpLeader;
 	Selector *mpChallenger;
 	std::list<Selector *> mWl;
 	std::list<Selector *> mWc;
+	Proposal mPropLeader;
+	Proposal mPropChallenger;
 
 	/* static functions */
 

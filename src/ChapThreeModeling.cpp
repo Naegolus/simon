@@ -23,8 +23,6 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <random>
-
 #include "ChapThreeModeling.h"
 
 #define dForEach_ProcState(gen) \
@@ -48,6 +46,7 @@ ChapThreeModeling::ChapThreeModeling()
 	, mNumCitizen(1000)
 	, mNumSelectorate(50)
 	, mNumWinning(10)
+	, mRng(random_device{}())
 	, mSelectors()
 	, mpLeader(NULL)
 	, mpChallenger(NULL)
@@ -58,6 +57,11 @@ ChapThreeModeling::ChapThreeModeling()
 }
 
 /* member functions */
+
+void ChapThreeModeling::seedSet(uint32_t seed)
+{
+	mRng.seed(seed);
+}
 
 Success ChapThreeModeling::process()
 {
@@ -81,10 +85,11 @@ Success ChapThreeModeling::process()
 		procInfLog("Number of citizens         (N)      %u", mNumCitizen);
 
 		selectorsCreate();
-		challengerSet();
 
+		challengerSet();
 		selectorsPick(&mWl);
 		selectorsPick(&mWc);
+		proposalsCreate();
 
 		mState = StMain;
 
@@ -169,17 +174,26 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 	}
 }
 
-ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()
+void ChapThreeModeling::proposalsCreate()
 {
-	return &mSelectors[randomGet(mNumSelectorate - 1)];
+	procInfLog("Creating proposals");
 }
 
-uint32_t ChapThreeModeling::randomGet(uint32_t nMax)
+ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()
 {
-	static thread_local mt19937 rng { random_device{}() };
-	uniform_int_distribution<uint32_t> dist(0, nMax);
+	return &mSelectors[randomInt(mNumSelectorate - 1)];
+}
 
-	return dist(rng);
+uint32_t ChapThreeModeling::randomInt(uint32_t nMax)
+{
+	uniform_int_distribution<uint32_t> dist(0, nMax);
+	return dist(mRng);
+}
+
+double ChapThreeModeling::randomDouble()
+{
+	uniform_real_distribution<double> dist(0.0, 1.0);
+	return dist(mRng);
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

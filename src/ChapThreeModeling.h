@@ -71,20 +71,15 @@ private:
 
 	struct Policies
 	{
+		double rateTax_r;
 		double goodsPrivate_g;
 		double goodsPublic_x;
-	};
-
-	struct Proposal
-	{
-		double rateTax_r;
-		Policies policies;
 	};
 
 	struct Strategy
 	{
 		std::list<Selector *> coalition;
-		Proposal proposal;
+		Policies proposal;
 	};
 
 	/* member functions */
@@ -111,7 +106,7 @@ private:
 	Strategy mStrategyLeader;
 	Strategy mStrategyChallenger;
 	std::list<Selector *> *mpCoalition;
-	Proposal *mpLaw;
+	Policies *mpLaw;
 
 	/* static functions */
 

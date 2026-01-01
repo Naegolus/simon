@@ -179,18 +179,17 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 		//procInfLog("%2u.  %3u", pCoal->size(), pSel->id);
 	}
 
-	procInfLog("  Creating proposal");
+	procInfLog("  Creating proposal for policies");
 
-	Proposal *pProp = &pStrategy->proposal;
+	Policies *pProp = &pStrategy->proposal;
 
 	pProp->rateTax_r = randomDouble();
-	pProp->policies.goodsPrivate_g = randomDouble();
-	pProp->policies.goodsPublic_x = randomDouble();
+	pProp->goodsPrivate_g = randomDouble();
+	pProp->goodsPublic_x = randomDouble();
 
 	procInfLog("    Tax rate            %.3f", pProp->rateTax_r);
-	procInfLog("    Policies");
-	procInfLog("      Private goods     %.3f", pProp->policies.goodsPrivate_g);
-	procInfLog("      Public goods      %.3f", pProp->policies.goodsPublic_x);
+	procInfLog("    Private goods     %.3f", pProp->goodsPrivate_g);
+	procInfLog("    Public goods      %.3f", pProp->goodsPublic_x);
 }
 
 void ChapThreeModeling::newLeaderVote()
@@ -216,8 +215,8 @@ void ChapThreeModeling::resultsDevelop()
 	procInfLog("Gov. revenues      %10.3f", revenues);
 
 	double p = 0.2;
-	double costs = mpLaw->policies.goodsPublic_x * p +
-				mpLaw->policies.goodsPrivate_g * mpCoalition->size();
+	double costs = mpLaw->goodsPublic_x * p +
+				mpLaw->goodsPrivate_g * mpCoalition->size();
 	procInfLog("Gov. costs         %10.3f", costs);
 }
 

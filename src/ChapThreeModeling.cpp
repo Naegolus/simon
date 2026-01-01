@@ -229,12 +229,13 @@ double ChapThreeModeling::payoffFrom(Strategy *pStrategy)
 	double leisure = 1 / (2 - pProp->rateTax_r);
 	double effort = 1 - leisure;
 	double loyaltyNorm = (double)mNumWinning / mNumSelectorate;
+	double activityReturns = (1 - pProp->rateTax_r) * effort;
 
 	if (isLeader)
-		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) / (1 - mDelta);
+		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) / (1 - mDelta);
 
-	return (utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) * loyaltyNorm +
-			utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, (1 - pProp->rateTax_r) * effort, leisure) * (1 - loyaltyNorm)) / (1 - mDelta);
+	return (utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) * loyaltyNorm +
+			utility(pProp->goodsPublic_x, 0, activityReturns, leisure) * (1 - loyaltyNorm)) / (1 - mDelta);
 }
 
 void ChapThreeModeling::lawEnact()
@@ -249,7 +250,8 @@ void ChapThreeModeling::resultsDevelop()
 	double effort = 1 - leisure;
 	procInfLog("Effort                  %10.3f", effort);
 
-	double payoffDisenf = utility(mpLaw->goodsPublic_x, 0, (1 - mpLaw->rateTax_r) * effort, leisure);
+	double activityReturns = (1 - mpLaw->rateTax_r) * effort;
+	double payoffDisenf = utility(mpLaw->goodsPublic_x, 0, activityReturns, leisure);
 	procInfLog("Payoff disenfranchized  %10.3f", payoffDisenf);
 
 	double activityEconomic = mNumCitizen * effort;

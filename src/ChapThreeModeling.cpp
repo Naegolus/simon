@@ -190,9 +190,9 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	pProp->goodsPrivate_g = randomDouble();
 	pProp->goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate            %.3f", pProp->rateTax_r);
-	procInfLog("    Private goods     %.3f", pProp->goodsPrivate_g);
-	procInfLog("    Public goods      %.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate               %.3f", pProp->rateTax_r);
+	procInfLog("    Private goods          %.3f", pProp->goodsPrivate_g);
+	procInfLog("    Public goods           %.3f", pProp->goodsPublic_x);
 }
 
 void ChapThreeModeling::newLeaderVote()
@@ -209,26 +209,35 @@ void ChapThreeModeling::resultsDevelop()
 {
 	double leisure = 1 / (2 - mpLaw->rateTax_r);
 	double effort = 1 - leisure;
-	procInfLog("Effort             %10.3f", effort);
+	procInfLog("Effort                %10.3f", effort);
+
+	double payoffDisenf = utility(mpLaw->goodsPublic_x, 0, (1 - mpLaw->rateTax_r) * effort, leisure);
+	procInfLog("Disenfranchised pay.  %10.3f", payoffDisenf);
 
 	double activityEconomic = mNumCitizen * effort;
-	procInfLog("Economic activity  %10.3f", activityEconomic);
+	procInfLog("Economic activity     %10.3f", activityEconomic);
 
 	double revenues = mpLaw->rateTax_r * activityEconomic;
-	procInfLog("Gov. revenues      %10.3f", revenues);
+	procInfLog("Gov. revenues         %10.3f", revenues);
 
 	double p = 0.2;
 	double costs = mpLaw->goodsPublic_x * p +
 				mpLaw->goodsPrivate_g * mpCoalition->size();
-	procInfLog("Gov. costs         %10.3f", costs);
+	procInfLog("Gov. costs            %10.3f", costs);
 
-	double payoff = revenues - costs;
-	procInfLog("Leader payoff      %10.3f", payoff);
+	double payoffLeader = revenues - costs;
+	procInfLog("Leader payoff         %10.3f", payoffLeader);
 }
 
-double ChapThreeModeling::utility(double x, double g, double y, double l)
+double ChapThreeModeling::utility(double goodsPublic_x,
+							double goodsPrivate_g,
+							double economicActivityReturns_y,
+							double leisure_l)
 {
-	return sqrt(x) + sqrt(g) + sqrt(y) + sqrt(l);
+	return sqrt(goodsPublic_x) +
+			sqrt(goodsPrivate_g) +
+			sqrt(economicActivityReturns_y) +
+			sqrt(leisure_l);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

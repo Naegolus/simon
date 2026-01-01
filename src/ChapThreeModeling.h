@@ -93,7 +93,10 @@ private:
 	void lawEnact();
 	void resultsDevelop();
 
-	double utility(double x, double g, double y, double l);
+	double utility(double goodsPublic_x,
+				double goodsPrivate_g,
+				double economicActivityReturns_y,
+				double leisure_l);
 
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);

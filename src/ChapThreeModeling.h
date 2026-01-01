@@ -45,7 +45,7 @@ public:
 	uint16_t mNumSelectorate;
 	uint8_t mNumWinning;
 
-	uint8_t mDelta;
+	double mDelta;
 	uint8_t mAgeWin;
 
 	void seedSet(uint32_t seed);
@@ -93,7 +93,7 @@ private:
 	void challengerSet();
 	void strategyCreate(Strategy *pStrategy);
 	void newLeaderVote();
-	double payoffFrom(Strategy *pStrategy);
+	double continuationValue(Strategy *pStrategy);
 	void lawEnact();
 	void resultsDevelop();
 

@@ -48,7 +48,7 @@ ChapThreeModeling::ChapThreeModeling()
 	, mNumCitizen(1000)
 	, mNumSelectorate(50)
 	, mNumWinning(10)
-	, mDelta(0)
+	, mDelta(0.01)
 	, mAgeWin(10)
 	, mRng(random_device{}())
 	, mSelectors()
@@ -208,14 +208,14 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 
 void ChapThreeModeling::newLeaderVote()
 {
-	double payoffFromLeader = payoffFrom(&mStrategyLeader);
-	procInfLog("Payoff from leader           %.3f", payoffFromLeader);
+	double contValLeader = continuationValue(&mStrategyLeader);
+	procInfLog("Cont. value from leader      %.3f", contValLeader);
 
-	double payoffFromChallenger = payoffFrom(&mStrategyChallenger);
-	procInfLog("Payoff from challenger       %.3f", payoffFromChallenger);
+	double contValChallenger = continuationValue(&mStrategyChallenger);
+	procInfLog("Cont. value from challenger  %.3f", contValChallenger);
 }
 
-double ChapThreeModeling::payoffFrom(Strategy *pStrategy)
+double ChapThreeModeling::continuationValue(Strategy *pStrategy)
 {
 	if (!pStrategy)
 	{

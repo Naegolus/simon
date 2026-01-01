@@ -187,6 +187,14 @@ void ChapThreeModeling::proposalCreate(Proposal *pProp)
 
 	procInfLog("Creating %s's proposal",
 				isLeader ? "leader" : "challenger");
+
+	pProp->rateTax_r = randomDouble();
+	pProp->goodsPrivate_g = randomDouble();
+	pProp->goodsPublic_x = randomDouble();
+
+	procInfLog("Tax rate          %.3f", pProp->rateTax_r);
+	procInfLog("Private goods     %.3f", pProp->goodsPrivate_g);
+	procInfLog("Public goods      %.3f", pProp->goodsPublic_x);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

@@ -72,8 +72,8 @@ private:
 	struct Proposal
 	{
 		double rateTax_r;
-		double goodsPublic_x;
 		double goodsPrivate_g;
+		double goodsPublic_x;
 	};
 
 	/* member functions */

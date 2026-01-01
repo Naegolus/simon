@@ -40,9 +40,14 @@ dProcessStateStr(ProcState);
 
 using namespace std;
 
+const uint32_t ChapThreeModeling::cNumCitizen = 1000;
+const uint16_t ChapThreeModeling::cNumSelectorate = 50;
+const uint8_t ChapThreeModeling::cNumWinning = 10;
+
 ChapThreeModeling::ChapThreeModeling()
 	: Processing("ChapThreeModeling")
 	//, mStartMs(0)
+	, mSelectors()
 {
 	mState = StStart;
 }
@@ -61,7 +66,13 @@ Success ChapThreeModeling::process()
 	{
 	case StStart:
 
-		procInfLog("Modelling chapter three.");
+		procInfLog("Modelling chapter three");
+
+		procInfLog("Number of citizens         %u", cNumCitizen);
+		procInfLog("Size of selectorate        %u", cNumSelectorate);
+		procInfLog("Size of winning coalition  %u", cNumWinning);
+
+		selectorsCreate();
 
 		mState = StMain;
 
@@ -77,6 +88,23 @@ Success ChapThreeModeling::process()
 	}
 
 	return Pending;
+}
+
+void ChapThreeModeling::selectorsCreate()
+{
+	procInfLog("Creating selectors");
+
+	Selector s;
+
+	mSelectors.clear();
+	mSelectors.reserve(cNumSelectorate);
+
+	for (uint16_t i = 0; i < cNumSelectorate; ++i)
+	{
+		s.id = i;
+
+		mSelectors.push_back(s);
+	}
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

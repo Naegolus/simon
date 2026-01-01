@@ -26,6 +26,8 @@
 #ifndef CHAP_THREE_MODELING_H
 #define CHAP_THREE_MODELING_H
 
+#include <vector>
+
 #include "Processing.h"
 
 class ChapThreeModeling : public Processing
@@ -57,14 +59,25 @@ private:
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
 
+	void selectorsCreate();
+
 	/* member variables */
+	struct Selector
+	{
+		uint32_t id;
+	};
+
 	//uint32_t mStartMs;
+	std::vector<Selector> mSelectors;
 
 	/* static functions */
 
 	/* static variables */
 
 	/* constants */
+	static const uint32_t cNumCitizen;
+	static const uint16_t cNumSelectorate;
+	static const uint8_t cNumWinning;
 
 };
 

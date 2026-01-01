@@ -23,6 +23,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <random>
+
 #include "ChapThreeModeling.h"
 
 #define dForEach_ProcState(gen) \
@@ -40,14 +42,15 @@ dProcessStateStr(ProcState);
 
 using namespace std;
 
-const uint32_t ChapThreeModeling::cNumCitizen = 1000;
-const uint16_t ChapThreeModeling::cNumSelectorate = 50;
-const uint8_t ChapThreeModeling::cNumWinning = 10;
-
 ChapThreeModeling::ChapThreeModeling()
 	: Processing("ChapThreeModeling")
 	//, mStartMs(0)
+	, mNumCitizen(1000)
+	, mNumSelectorate(50)
+	, mNumWinning(10)
 	, mSelectors()
+	, mWl()
+	, mWc()
 {
 	mState = StStart;
 }
@@ -68,11 +71,17 @@ Success ChapThreeModeling::process()
 
 		procInfLog("Modelling chapter three");
 
-		procInfLog("Number of citizens         %u", cNumCitizen);
-		procInfLog("Size of selectorate        %u", cNumSelectorate);
-		procInfLog("Size of winning coalition  %u", cNumWinning);
+		if (!mNumCitizen || !mNumSelectorate || !mNumWinning)
+			return procErrLog(-1, "invalid arguments");
+
+		procInfLog("Number of citizens         (N)      %u", mNumCitizen);
+		procInfLog("Size of selectorate        (S)      %u", mNumSelectorate);
+		procInfLog("Size of winning coalition  (W)      %u", mNumWinning);
 
 		selectorsCreate();
+
+		selectorsPick(&mWl);
+		selectorsPick(&mWc);
 
 		mState = StMain;
 
@@ -94,17 +103,69 @@ void ChapThreeModeling::selectorsCreate()
 {
 	procInfLog("Creating selectors");
 
-	Selector s;
+	Selector sel;
 
 	mSelectors.clear();
-	mSelectors.reserve(cNumSelectorate);
+	mSelectors.reserve(mNumSelectorate);
 
-	for (uint16_t i = 0; i < cNumSelectorate; ++i)
+	for (uint16_t i = 0; i < mNumSelectorate; ++i)
 	{
-		s.id = i;
+		sel.id = i + 1;
+		sel.chosenByLeader = false;
+		sel.chosenByChallenger = false;
 
-		mSelectors.push_back(s);
+		mSelectors.push_back(sel);
 	}
+}
+
+void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
+{
+	if (!pWinningCoalition)
+	{
+		procWrnLog("could not create winning coalition");
+		return;
+	}
+
+	bool isLeader = pWinningCoalition == &mWl;
+
+	procInfLog("%s picks selectors for winning coalition %s",
+				isLeader ? "Leader" : "Challenger",
+				isLeader ? "(Wl)" : "(Wc)");
+
+	uint32_t idx;
+	Selector *pSel;
+	bool *pChosen;
+
+	pWinningCoalition->clear();
+
+	while (pWinningCoalition->size() < mNumWinning)
+	{
+		idx = randomGet(mNumSelectorate - 1);
+		//procInfLog("random idx = %u", idx);
+
+		pSel = &mSelectors[idx];
+
+		pChosen = isLeader ? &pSel->chosenByLeader : &pSel->chosenByChallenger;
+
+		if (*pChosen)
+		{
+			//procWrnLog("chosen already");
+			continue;
+		}
+
+		*pChosen = true;
+		pWinningCoalition->push_back(pSel);
+		procInfLog("%2u.: %3u", pWinningCoalition->size(), pSel->id);
+
+	}
+}
+
+uint32_t ChapThreeModeling::randomGet(uint32_t nMax)
+{
+	static thread_local mt19937 rng { random_device{}() };
+	uniform_int_distribution<uint32_t> dist(0, nMax);
+
+	return dist(rng);
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

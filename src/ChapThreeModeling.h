@@ -40,6 +40,10 @@ public:
 		return new dNoThrow ChapThreeModeling;
 	}
 
+	uint32_t mNumCitizen;
+	uint16_t mNumSelectorate;
+	uint8_t mNumWinning;
+
 protected:
 
 	virtual ~ChapThreeModeling() {}
@@ -55,29 +59,33 @@ private:
 	 * Example:              peerAdd()
 	 */
 
+	struct Selector
+	{
+		uint32_t id;
+		bool chosenByLeader;
+		bool chosenByChallenger;
+	};
+
 	/* member functions */
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
 
 	void selectorsCreate();
+	void selectorsPick(std::list<Selector *> *winningCoalition);
+
+	uint32_t randomGet(uint32_t nMax);
 
 	/* member variables */
-	struct Selector
-	{
-		uint32_t id;
-	};
-
 	//uint32_t mStartMs;
 	std::vector<Selector> mSelectors;
+	std::list<Selector *> mWl;
+	std::list<Selector *> mWc;
 
 	/* static functions */
 
 	/* static variables */
 
 	/* constants */
-	static const uint32_t cNumCitizen;
-	static const uint16_t cNumSelectorate;
-	static const uint8_t cNumWinning;
 
 };
 

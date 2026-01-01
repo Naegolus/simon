@@ -50,8 +50,8 @@ ChapThreeModeling::ChapThreeModeling()
 	, mSelectors()
 	, mpLeader(NULL)
 	, mpChallenger(NULL)
-	, mWl()
-	, mWc()
+	, mStrategyLeader()
+	, mStrategyChallenger()
 {
 	mState = StStart;
 }
@@ -87,10 +87,8 @@ Success ChapThreeModeling::process()
 		selectorsCreate();
 
 		challengerSet();
-		selectorsPick(&mWl);
-		selectorsPick(&mWc);
-		proposalCreate(&mPropLeader);
-		proposalCreate(&mPropChallenger);
+		strategyCreate(&mStrategyLeader);
+		strategyCreate(&mStrategyChallenger);
 
 		mState = StMain;
 
@@ -134,27 +132,29 @@ void ChapThreeModeling::challengerSet()
 	while (mpChallenger = randomSelGet(), mpChallenger == mpLeader);
 }
 
-void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
+void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 {
-	if (!pWinningCoalition)
+	if (!pStrategy)
 	{
-		procWrnLog("could not create winning coalition");
+		procWrnLog("could not create strategy");
 		return;
 	}
 
-	bool isLeader = pWinningCoalition == &mWl;
+	bool isLeader = pStrategy == &mStrategyLeader;
 
-	procInfLog("%s (%u) picks selectors for winning coalition %s",
+	procInfLog("%s (%u) picks strategy",
 				isLeader ? "Leader" : "Challenger",
-				isLeader ? mpLeader->id : mpChallenger->id,
-				isLeader ? "(Wl)" : "(Wc)");
+				isLeader ? mpLeader->id : mpChallenger->id);
 
+	procInfLog("  Assemble coalition");
+
+	list<Selector *> *pCoal = &pStrategy->coalition;
 	Selector *pSel;
 	bool *pChosen;
 
-	pWinningCoalition->clear();
+	pCoal->clear();
 
-	while (pWinningCoalition->size() < mNumWinning)
+	while (pCoal->size() < mNumWinning)
 	{
 		pSel = randomSelGet();
 
@@ -170,31 +170,21 @@ void ChapThreeModeling::selectorsPick(list<Selector *> *pWinningCoalition)
 			continue;
 
 		*pChosen = true;
-		pWinningCoalition->push_back(pSel);
-		//procInfLog("%2u.  %3u", pWinningCoalition->size(), pSel->id);
-	}
-}
-
-void ChapThreeModeling::proposalCreate(Proposal *pProp)
-{
-	if (!pProp)
-	{
-		procWrnLog("could not create proposal");
-		return;
+		pCoal->push_back(pSel);
+		//procInfLog("%2u.  %3u", pCoal->size(), pSel->id);
 	}
 
-	bool isLeader = pProp == &mPropLeader;
+	procInfLog("  Creating proposal");
 
-	procInfLog("Creating %s's proposal",
-				isLeader ? "leader" : "challenger");
+	Proposal *pProp = &pStrategy->proposal;
 
 	pProp->rateTax_r = randomDouble();
 	pProp->goodsPrivate_g = randomDouble();
 	pProp->goodsPublic_x = randomDouble();
 
-	procInfLog("Tax rate          %.3f", pProp->rateTax_r);
-	procInfLog("Private goods     %.3f", pProp->goodsPrivate_g);
-	procInfLog("Public goods      %.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate          %.3f", pProp->rateTax_r);
+	procInfLog("    Private goods     %.3f", pProp->goodsPrivate_g);
+	procInfLog("    Public goods      %.3f", pProp->goodsPublic_x);
 }
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()

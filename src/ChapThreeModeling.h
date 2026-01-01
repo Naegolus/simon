@@ -76,14 +76,19 @@ private:
 		double goodsPublic_x;
 	};
 
+	struct Strategy
+	{
+		std::list<Selector *> coalition;
+		Proposal proposal;
+	};
+
 	/* member functions */
 	Success process();
 	void processInfo(char *pBuf, char *pBufEnd);
 
 	void selectorsCreate();
 	void challengerSet();
-	void selectorsPick(std::list<Selector *> *winningCoalition);
-	void proposalCreate(Proposal *pProp);
+	void strategyCreate(Strategy *pStrategy);
 
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);
@@ -95,10 +100,8 @@ private:
 	std::vector<Selector> mSelectors;
 	Selector *mpLeader;
 	Selector *mpChallenger;
-	std::list<Selector *> mWl;
-	std::list<Selector *> mWc;
-	Proposal mPropLeader;
-	Proposal mPropChallenger;
+	Strategy mStrategyLeader;
+	Strategy mStrategyChallenger;
 
 	/* static functions */
 

@@ -44,7 +44,9 @@ public:
 	uint32_t mNumCitizen;
 	uint16_t mNumSelectorate;
 	uint8_t mNumWinning;
+
 	uint8_t mDelta;
+	uint8_t mAgeWin;
 
 	void seedSet(uint32_t seed);
 

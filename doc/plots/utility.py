@@ -31,7 +31,7 @@ plt.plot(l, y,  label = "Returns y(r)")
 plt.plot(l, Vi, label = "Utility Vi(r)")
 plt.plot(l, Vi_star, label = "Utility Vi*(r)")
 
-plt.title("Optimum leisure")
+plt.title(f"Optimum leisure at tax rate r = {r}")
 plt.xlabel("Leisure l")
 plt.legend()
 plt.grid(True)

@@ -12,13 +12,14 @@ def V(x, g, y, l):
 # l .. Leisure
 
 N = 5
-r = np.linspace(0.0, 1.0, 200)
 
-returns = 1 - r
+r = np.linspace(0.0, 1.0, 200)
 l = 1.0 / (2.0 - r)
 
 e = 1 - l
-y = returns * e
+untaxed = 1 - r
+
+y = untaxed * e
 Vi = V(0.0, 0.0, y, l)
 
 E = N * e

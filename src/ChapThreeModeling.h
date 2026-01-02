@@ -45,6 +45,7 @@ public:
 	uint16_t mNumSelectorate;
 	uint8_t mNumWinning;
 
+	double mCostPublic;
 	double mDelta;
 	uint8_t mAgeWin;
 
@@ -79,10 +80,22 @@ private:
 		double goodsPublic_x;
 	};
 
+	struct Consequences
+	{
+		double leisure_l;
+		double effort_e;
+		double activityReturns_y;
+		double payoffDisenfranchized;
+		double activityEconomic_E;
+		double revenuesGov_R;
+		double costsGov_M;
+	};
+
 	struct Strategy
 	{
 		std::list<Selector *> coalition;
 		Policies proposal;
+		Consequences estimations;
 	};
 
 	/* member functions */
@@ -92,6 +105,7 @@ private:
 	void selectorsCreate();
 	void challengerSet();
 	void strategyCreate(Strategy *pStrategy);
+	void consequencesCalc(Strategy *pStrategy);
 	void newLeaderVote();
 	double continuationValue(Strategy *pStrategy);
 	void lawEnact();

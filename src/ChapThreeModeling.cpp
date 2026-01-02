@@ -48,6 +48,7 @@ ChapThreeModeling::ChapThreeModeling()
 	, mNumCitizen(1000)
 	, mNumSelectorate(50)
 	, mNumWinning(10)
+	, mCostPublic(0.2)
 	, mDelta(0.01)
 	, mAgeWin(10)
 	, mRng(random_device{}())
@@ -201,18 +202,43 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	pProp->goodsPrivate_g = randomDouble();
 	pProp->goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate                 %.3f", pProp->rateTax_r);
-	procInfLog("    Private goods            %.3f", pProp->goodsPrivate_g);
-	procInfLog("    Public goods             %.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate                 %10.3f", pProp->rateTax_r);
+	procInfLog("    Private goods            %10.3f", pProp->goodsPrivate_g);
+	procInfLog("    Public goods             %10.3f", pProp->goodsPublic_x);
+
+	consequencesCalc(pStrategy);
+}
+
+void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
+{
+	procInfLog("  Estimated consequences");
+
+	Policies *pProp = &pStrategy->proposal;
+	Consequences *pEst = &pStrategy->estimations;
+
+	pEst->leisure_l = 1 / (2 - pProp->rateTax_r);
+	pEst->effort_e = 1 - pEst->leisure_l;
+	pEst->activityReturns_y = (1 - pProp->rateTax_r) * pEst->effort_e;
+	pEst->payoffDisenfranchized = utility(pProp->goodsPublic_x, 0, pEst->activityReturns_y, pEst->leisure_l);
+
+	pEst->activityEconomic_E = mNumCitizen * pEst->effort_e;
+	pEst->revenuesGov_R = pProp->rateTax_r * pEst->activityEconomic_E;
+	pEst->costsGov_M = pProp->goodsPublic_x * mCostPublic +
+					pProp->goodsPrivate_g * pStrategy->coalition.size();
+
+	procInfLog("    Effort                   %10.3f", pEst->effort_e);
+	procInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
+	procInfLog("    Government revenues      %10.3f", pEst->revenuesGov_R);
+	procInfLog("    Government costs         %10.3f", pEst->costsGov_M);
 }
 
 void ChapThreeModeling::newLeaderVote()
 {
 	double contValLeader = continuationValue(&mStrategyLeader);
-	procInfLog("Cont. value from leader      %.3f", contValLeader);
+	procInfLog("Cont. value from leader      %10.3f", contValLeader);
 
 	double contValChallenger = continuationValue(&mStrategyChallenger);
-	procInfLog("Cont. value from challenger  %.3f", contValChallenger);
+	procInfLog("Cont. value from challenger  %10.3f", contValChallenger);
 }
 
 double ChapThreeModeling::continuationValue(Strategy *pStrategy)
@@ -248,28 +274,7 @@ void ChapThreeModeling::lawEnact()
 
 void ChapThreeModeling::resultsDevelop()
 {
-	double leisure = 1 / (2 - mpLaw->rateTax_r);
-	double effort = 1 - leisure;
-	double activityReturns = (1 - mpLaw->rateTax_r) * effort;
-
-	double payoffDisenf = utility(mpLaw->goodsPublic_x, 0, activityReturns, leisure);
-	procInfLog("Payoff disenfranchized  %10.3f", payoffDisenf);
-
-	procInfLog("Effort                  %10.3f", effort);
-
-	double activityEconomic = mNumCitizen * effort;
-	procInfLog("Economic activity       %10.3f", activityEconomic);
-
-	double revenues = mpLaw->rateTax_r * activityEconomic;
-	procInfLog("Gov. revenues           %10.3f", revenues);
-
-	double p = 0.2;
-	double costs = mpLaw->goodsPublic_x * p +
-				mpLaw->goodsPrivate_g * mpCoalition->size();
-	procInfLog("Gov. costs              %10.3f", costs);
-
-	double payoffLeader = revenues - costs;
-	procInfLog("Payoff leader           %10.3f", payoffLeader);
+	// Check law
 }
 
 double ChapThreeModeling::utility(double goodsPublic_x,

@@ -41,9 +41,9 @@ public:
 		return new dNoThrow ChapThreeModeling;
 	}
 
-	uint32_t mNumCitizen;
-	uint16_t mNumSelectorate;
-	uint8_t mNumWinning;
+	uint8_t mNumWinning_W;
+	uint16_t mNumSelectorate_S;
+	uint32_t mNumCitizen_N;
 
 	double mCostPublic;
 	double mDelta;

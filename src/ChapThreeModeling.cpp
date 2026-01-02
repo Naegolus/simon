@@ -45,9 +45,9 @@ using namespace std;
 ChapThreeModeling::ChapThreeModeling()
 	: Processing("ChapThreeModeling")
 	//, mStartMs(0)
-	, mNumCitizen(1000)
-	, mNumSelectorate(50)
-	, mNumWinning(10)
+	, mNumWinning_W(10)
+	, mNumSelectorate_S(50)
+	, mNumCitizen_N(1000)
 	, mCostPublic(0.2)
 	, mDelta(0.01)
 	, mAgeWin(10)
@@ -84,13 +84,13 @@ Success ChapThreeModeling::process()
 
 		procInfLog("Modelling chapter three");
 
-		if (!mNumCitizen || !mNumSelectorate || !mNumWinning)
+		if (!mNumWinning_W || !mNumSelectorate_S || !mNumCitizen_N)
 			return procErrLog(-1, "invalid arguments");
 
-		procInfLog("Size of winning coalition    (W)      %6u", mNumWinning);
-		procInfLog("Size of selectorate          (S)      %6u", mNumSelectorate);
-		procInfLog("Number of citizens           (N)      %6u", mNumCitizen);
-		procInfLog("Loyalty norm                 (W/S)    %10.3f", (double)mNumWinning / mNumSelectorate);
+		procInfLog("Size of winning coalition    (W)      %6u", mNumWinning_W);
+		procInfLog("Size of selectorate          (S)      %6u", mNumSelectorate_S);
+		procInfLog("Number of citizens           (N)      %6u", mNumCitizen_N);
+		procInfLog("Loyalty norm                 (W/S)    %10.3f", (double)mNumWinning_W / mNumSelectorate_S);
 
 		selectorsCreate();
 
@@ -124,9 +124,9 @@ void ChapThreeModeling::selectorsCreate()
 	Selector sel;
 
 	mSelectors.clear();
-	mSelectors.reserve(mNumSelectorate);
+	mSelectors.reserve(mNumSelectorate_S);
 
-	for (uint16_t i = 0; i < mNumSelectorate; ++i)
+	for (uint16_t i = 0; i < mNumSelectorate_S; ++i)
 	{
 		sel.id = i + 1;
 		sel.chosenByLeader = false;
@@ -167,7 +167,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 	pCoal->clear();
 
-	while (pCoal->size() < mNumWinning)
+	while (pCoal->size() < mNumWinning_W)
 	{
 		pSel = randomSelGet();
 
@@ -225,7 +225,7 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 	pEst->activityReturns_y = (1 - pProp->rateTax_r) * pEst->effort_e;
 	pEst->payoffDisenfranchized = utility(pProp->goodsPublic_x, 0, pEst->activityReturns_y, pEst->leisure_l);
 
-	pEst->activityEconomic_E = mNumCitizen * pEst->effort_e;
+	pEst->activityEconomic_E = mNumCitizen_N * pEst->effort_e;
 	pEst->revenuesGov_R = pProp->rateTax_r * pEst->activityEconomic_E;
 	pEst->costsGov_M = pProp->goodsPublic_x * mCostPublic +
 					pProp->goodsPrivate_g * pStrategy->coalition.size();
@@ -261,7 +261,7 @@ double ChapThreeModeling::continuationValue(Strategy *pStrategy)
 	double effort = 1 - leisure;
 	double activityReturns = (1 - pProp->rateTax_r) * effort;
 	uint8_t numWinning = pStrategy->coalition.size();
-	double loyaltyNorm = (double)numWinning / mNumSelectorate;
+	double loyaltyNorm = (double)numWinning / mNumSelectorate_S;
 
 	if (isLeader)
 		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) / (1 - mDelta);
@@ -294,7 +294,7 @@ double ChapThreeModeling::utility(double goodsPublic_x,
 
 ChapThreeModeling::Selector *ChapThreeModeling::randomSelGet()
 {
-	return &mSelectors[randomInt(mNumSelectorate - 1)];
+	return &mSelectors[randomInt(mNumSelectorate_S - 1)];
 }
 
 uint32_t ChapThreeModeling::randomInt(uint32_t nMax)

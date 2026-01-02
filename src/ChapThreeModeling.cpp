@@ -153,7 +153,7 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 
 	bool isLeader = pStrategy == &mStrategyLeader;
 
-	procInfLog("%s (%u) picks strategy",
+	procInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
 				isLeader ? "Leader" : "Challenger",
 				isLeader ? mpLeader->id : mpChallenger->id);
 
@@ -192,7 +192,7 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	for (uint8_t i = 0; i < 4; ++i, ++iSel)
 		dInfo("%u,", (*iSel)->id);
 
-	procInfLog("  Assemble coalition {%s...}", buf);
+	procInfLog("  Assemble coalition W = {%s...}", buf);
 
 	procInfLog("  Creating proposal for policies");
 
@@ -228,7 +228,7 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 
 	procInfLog("    Effort                   %10.3f", pEst->effort_e);
 	procInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
-	procInfLog("    Government revenues      %10.3f", pEst->revenuesGov_R);
+	procInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pEst->revenuesGov_R);
 	procInfLog("    Government costs         %10.3f", pEst->costsGov_M);
 }
 

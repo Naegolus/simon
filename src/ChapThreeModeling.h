@@ -107,7 +107,7 @@ private:
 	void strategyRandomCreate(Strategy *pStrategy);
 	void consequencesCalc(Strategy *pStrategy);
 	void newLeaderVote();
-	double continuationValue(Strategy *pStrategy);
+	double continuationValue(Strategy *pStrategy, Selector *pSel);
 	void lawEnact();
 	void resultsDevelop();
 

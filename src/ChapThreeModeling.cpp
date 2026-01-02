@@ -238,16 +238,22 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 
 void ChapThreeModeling::newLeaderVote()
 {
-	double contValLeader = continuationValue(&mStrategyLeader);
-	procInfLog("Cont. value from leader      %10.3f", contValLeader);
+	vector<Selector>::iterator iSel;
+	//double contVal;
 
-	double contValChallenger = continuationValue(&mStrategyChallenger);
-	procInfLog("Cont. value from challenger  %10.3f", contValChallenger);
+	iSel = mSelectors.begin();
+	for (; iSel != mSelectors.end(); ++iSel)
+	{
+		procInfLog("Selector %2u: %c, %c",
+					iSel->id,
+					iSel->chosenByLeader ? 'L' : '-',
+					iSel->chosenByChallenger ? 'C' : '-');
+	}
 }
 
-double ChapThreeModeling::continuationValue(Strategy *pStrategy)
+double ChapThreeModeling::continuationValue(Strategy *pStrategy, Selector *pSel)
 {
-	if (!pStrategy)
+	if (!pStrategy || !pSel)
 	{
 		procWrnLog("could not get payoff");
 		return 0.0;

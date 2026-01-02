@@ -134,8 +134,6 @@ void ChapThreeModeling::selectorsCreate()
 
 		mSelectors.push_back(sel);
 	}
-
-	mpLeader = randomSelGet();
 }
 
 void ChapThreeModeling::challengerSet()
@@ -152,6 +150,12 @@ void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
 	}
 
 	bool isLeader = pStrategy == &mStrategyLeader;
+
+	if (isLeader and !mpLeader)
+	{
+		procInfLog("No leader");
+		return;
+	}
 
 	procInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
 				isLeader ? "Leader" : "Challenger",

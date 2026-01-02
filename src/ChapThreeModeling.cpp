@@ -95,8 +95,8 @@ Success ChapThreeModeling::process()
 		selectorsCreate();
 
 		challengerSet();
-		strategyCreate(&mStrategyLeader);
-		strategyCreate(&mStrategyChallenger);
+		strategyRandomCreate(&mStrategyLeader);
+		strategyRandomCreate(&mStrategyChallenger);
 		newLeaderVote();
 		lawEnact();
 		resultsDevelop();
@@ -141,7 +141,7 @@ void ChapThreeModeling::challengerSet()
 	while (mpChallenger = randomSelGet(), mpChallenger == mpLeader);
 }
 
-void ChapThreeModeling::strategyCreate(Strategy *pStrategy)
+void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 {
 	if (!pStrategy)
 	{

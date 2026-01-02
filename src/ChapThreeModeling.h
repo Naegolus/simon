@@ -104,7 +104,7 @@ private:
 
 	void selectorsCreate();
 	void challengerSet();
-	void strategyCreate(Strategy *pStrategy);
+	void strategyRandomCreate(Strategy *pStrategy);
 	void consequencesCalc(Strategy *pStrategy);
 	void newLeaderVote();
 	double continuationValue(Strategy *pStrategy);

@@ -230,7 +230,8 @@ double ChapThreeModeling::continuationValue(Strategy *pStrategy)
 	double leisure = 1 / (2 - pProp->rateTax_r);
 	double effort = 1 - leisure;
 	double activityReturns = (1 - pProp->rateTax_r) * effort;
-	double loyaltyNorm = (double)mNumWinning / mNumSelectorate;
+	uint8_t numWinning = pStrategy->coalition.size();
+	double loyaltyNorm = (double)numWinning / mNumSelectorate;
 
 	if (isLeader)
 		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) / (1 - mDelta);

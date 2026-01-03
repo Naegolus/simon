@@ -512,6 +512,7 @@ void ChapThreeModeling::resultsPrint()
 	userInfLog("    Payoff W                 %10.3f", mPayoffMax);
 	userInfLog("");
 	userInfLog("=====================================================");
+	userInfLog("");
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

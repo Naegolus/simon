@@ -320,7 +320,7 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel)
 
 	ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
 
-	userInfLog("Selector %2u, %c%c: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %c",
+	userInfLog("Selector %2u, %c%c: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %s%c\033[0m",
 				pSel->id,
 				utilityFromIncumbent_VL,
 				mDelta * continuationFromIncumbent_ZL,
@@ -330,6 +330,7 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel)
 				payoffFromChallenger_UC,
 				pSel->chosenByIncumbent ? 'L' : '-',
 				pSel->chosenByChallenger ? 'C' : '-',
+				pSel->chosenByIncumbent and ok ? "\033[1;33m" : "",
 				ok ? 'C' : 'L');
 
 	return ok;

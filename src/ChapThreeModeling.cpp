@@ -40,6 +40,17 @@ dProcessStateEnum(ProcState);
 dProcessStateStr(ProcState);
 #endif
 
+#define dVoteProcessPrint	0
+
+#if dVoteProcessPrint
+#define procVoteLog	userInfLog
+#else
+void procVoteLog(const char *msg, ...)
+{
+	(void)msg;
+}
+#endif
+
 using namespace std;
 
 ChapThreeModeling::ChapThreeModeling()
@@ -85,6 +96,7 @@ Success ChapThreeModeling::process()
 	{
 	case StStart:
 
+		userInfLog("");
 		userInfLog("Modelling chapter three");
 
 		if (!mNumWinning_W || !mNumSelectorate_S || !mNumCitizen_N)
@@ -127,7 +139,7 @@ Success ChapThreeModeling::process()
 
 void ChapThreeModeling::selectorsCreate()
 {
-	userInfLog("Creating selectors");
+	procVoteLog("Creating selectors");
 
 	Selector sel;
 
@@ -146,7 +158,7 @@ void ChapThreeModeling::selectorsCreate()
 
 void ChapThreeModeling::challengerSet()
 {
-	userInfLog("-------------------------------------------------- Period %u", mNumVotesDone + 1);
+	procVoteLog("-------------------------------------------------- Period %u", mNumVotesDone + 1);
 
 	vector<Selector>::iterator iSel;
 
@@ -169,11 +181,11 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 	if (forIncumbent and !mpIncumbent)
 	{
-		userInfLog("No leader");
+		procVoteLog("No leader");
 		return;
 	}
 
-	userInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
+	procVoteLog("\033[1;36m%s\033[0m (%u) picks strategy",
 				forIncumbent ? "Incumbent" : "Challenger",
 				forIncumbent ? mpIncumbent->id : mpChallenger->id);
 
@@ -204,7 +216,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 		*pChosen = true;
 		pCoal->push_back(pSel);
-		//userInfLog("%2u.  %3u", pCoal->size(), pSel->id);
+		//procVoteLog("%2u.  %3u", pCoal->size(), pSel->id);
 	}
 
 	list<Selector *>::iterator iSel = pCoal->begin();
@@ -216,9 +228,9 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	for (uint8_t i = 0; i < 4; ++i, ++iSel)
 		dInfo("%u,", (*iSel)->id);
 
-	userInfLog("  Assemble coalition W = {%s...}", buf);
+	procVoteLog("  Assemble coalition W = {%s...}", buf);
 
-	userInfLog("  Creating proposal for policies");
+	procVoteLog("  Creating proposal for policies");
 
 	Policies *pPol = &pStrategy->proposal;
 
@@ -226,14 +238,15 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	pPol->goodsPrivate_g = randomDouble();
 	pPol->goodsPublic_x = randomDouble();
 
+#if dVoteProcessPrint
 	policiesPrint(pPol);
-
+#endif
 	consequencesCalc(pStrategy);
 }
 
 void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 {
-	userInfLog("  Estimated consequences");
+	procVoteLog("  Estimated consequences");
 
 	Policies *pPol = &pStrategy->proposal;
 	Consequences *pEst = &pStrategy->estimations;
@@ -249,7 +262,9 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 	pEst->costsPublic = pPol->goodsPublic_x * mCostPublic;
 	pEst->costsGov_M = pEst->costsPrivate + pEst->costsPublic;
 
+#if dVoteProcessPrint
 	consequencesPrint(pEst);
+#endif
 }
 
 void ChapThreeModeling::newIncumbentVote()
@@ -275,7 +290,7 @@ void ChapThreeModeling::newIncumbentVote()
 
 	if (cntForIncumbent >= mNumWinning_W or cntForChallenger < mNumWinning_W)
 	{
-		userInfLog("\033[1;32mIncumbent stays in office\033[0m");
+		procVoteLog("\033[1;32mIncumbent stays in office\033[0m");
 
 		if (mNumVotesDone == mNumVotesMax)
 		{
@@ -284,34 +299,32 @@ void ChapThreeModeling::newIncumbentVote()
 
 			userInfLog("");
 			userInfLog("=====================================================");
-			userInfLog("Policies");
+			userInfLog("Number of votes: %u", mNumVotesMax);
 			userInfLog("");
-			userInfLog("Tax                     (r)       %12.3f", pPol->rateTax_r);
-			userInfLog("Private goods           (g)       %12.3f", pPol->goodsPrivate_g);
-			userInfLog("Public goods            (x)       %12.3f", pPol->goodsPublic_x);
+			userInfLog("  Policies");
+			policiesPrint(pPol);
 			userInfLog("");
-			userInfLog("-----------------------------------------------------");
-			userInfLog("Consequences");
-			userInfLog("");
-			userInfLog("Payoff W                (U_L)     %12.3f", payoffMax);
-			userInfLog("Leisure                 (l)       %12.3f", pCon->leisure_l);
-			userInfLog("Economic activity       (E)       %12.3f", pCon->activityEconomic_E);
+			userInfLog("  Consequences");
+			consequencesPrint(pCon);
+			userInfLog("    Payoff W                 %10.3f", payoffMax);
 			userInfLog("");
 			userInfLog("=====================================================");
 
 			return;
 		}
 
-		userInfLog("  Government policies");
+		procVoteLog("  Government policies");
+#if dVoteProcessPrint
 		policiesPrint(&mStrategyIncumbent.proposal);
-
-		userInfLog("  Government state");
+#endif
+		procVoteLog("  Government state");
+#if dVoteProcessPrint
 		consequencesPrint(&mStrategyIncumbent.estimations);
-
+#endif
 		return;
 	}
 
-	userInfLog("\033[1;33mChallenger takes office\033[0m");
+	procVoteLog("\033[1;33mChallenger takes office\033[0m");
 
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
@@ -365,7 +378,7 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint, double
 	if (maskPrint & bitPrint)
 		return ok;
 
-	userInfLog("Selector %2u, %s%s: (%.3f + %.3f) %.3f %c %.3f (%.3f + %.3f) => %s%c\033[0m",
+	procVoteLog("Selector %2u, %s%s: (%.3f + %.3f) %.3f %c %.3f (%.3f + %.3f) => %s%c\033[0m",
 				pSel->id,
 				pSel->chosenByIncumbent ? "\033[1;36mL\033[0m" : "-",
 				pSel->chosenByChallenger ? "C" : "-",
@@ -485,7 +498,9 @@ void ChapThreeModeling::consequencesPrint(Consequences *pCon)
 
 	userInfLog("    Effort                   %10.3f", pCon->effort_e);
 	userInfLog("    Economic activity        %10.3f", pCon->activityEconomic_E);
-	userInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pCon->revenuesGov_R);
+	userInfLog("    Government %srevenues      %10.3f\033[0m",
+					pCon->revenuesGov_R > pCon->costsGov_M ? "\033[1;32m" : "\033[1;33m",
+					pCon->revenuesGov_R);
 	userInfLog("    Government costs         %10.3f", pCon->costsGov_M);
 	userInfLog("      Private                %10.3f", pCon->costsPrivate);
 	userInfLog("      Public                 %10.3f", pCon->costsPublic);

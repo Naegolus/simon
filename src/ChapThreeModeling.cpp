@@ -279,13 +279,15 @@ void ChapThreeModeling::newIncumbentVote()
 
 		if (mNumVotesDone == mNumVotesMax)
 		{
+			Policies *pPol = &mStrategyIncumbent.proposal;
 			Consequences *pCon = &mStrategyIncumbent.estimations;
 
 			userInfLog("");
-			userInfLog("---------------------------------------");
-			userInfLog("Payoff W                %12.3f", payoffMax);
-			userInfLog("Economic activity E     %12.3f", pCon->activityEconomic_E);
-			userInfLog("---------------------------------------");
+			userInfLog("-----------------------------------------------------");
+			userInfLog("Payoff W                (U_L)     %12.3f", payoffMax);
+			userInfLog("Tax                     (r  )     %12.3f", pPol->rateTax_r);
+			userInfLog("Economic activity       (E  )     %12.3f", pCon->activityEconomic_E);
+			userInfLog("-----------------------------------------------------");
 
 			return;
 		}

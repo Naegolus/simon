@@ -301,7 +301,7 @@ void ChapThreeModeling::newIncumbentVote()
 			userInfLog("=====================================================");
 			userInfLog("Number of votes: %u", mNumVotesMax);
 			userInfLog("");
-			userInfLog("  Policies");
+			userInfLog("  Final policies");
 			policiesPrint(pPol);
 			userInfLog("");
 			userInfLog("  Consequences");

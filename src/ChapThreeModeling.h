@@ -88,6 +88,8 @@ private:
 		double payoffDisenfranchized;
 		double activityEconomic_E;
 		double revenuesGov_R;
+		double costsPrivate;
+		double costsPublic;
 		double costsGov_M;
 	};
 
@@ -120,6 +122,9 @@ private:
 	Selector *randomSelGet();
 	uint32_t randomInt(uint32_t nMax);
 	double randomDouble();
+
+	void policiesPrint(Policies *pPol);
+	void consequencesPrint(Consequences *pCon);
 
 	/* member variables */
 	//uint32_t mStartMs;

@@ -233,9 +233,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	pPol->goodsPrivate_g = randomDouble();
 	pPol->goodsPublic_x = randomDouble();
 
-	userInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
-	userInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
-	userInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
+	policiesPrint(pPol);
 
 	consequencesCalc(pStrategy);
 }
@@ -254,16 +252,11 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 
 	pEst->activityEconomic_E = mNumCitizen_N * pEst->effort_e;
 	pEst->revenuesGov_R = pPol->rateTax_r * pEst->activityEconomic_E;
-	double costsPrivate = pPol->goodsPrivate_g * pStrategy->coalition.size();
-	double costsPublic = pPol->goodsPublic_x * mCostPublic;
-	pEst->costsGov_M = costsPrivate + costsPublic;
+	pEst->costsPrivate = pPol->goodsPrivate_g * pStrategy->coalition.size();
+	pEst->costsPublic = pPol->goodsPublic_x * mCostPublic;
+	pEst->costsGov_M = pEst->costsPrivate + pEst->costsPublic;
 
-	userInfLog("    Effort                   %10.3f", pEst->effort_e);
-	userInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
-	userInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pEst->revenuesGov_R);
-	userInfLog("    Government costs         %10.3f", pEst->costsGov_M);
-	userInfLog("      Private                %10.3f", costsPrivate);
-	userInfLog("      Public                 %10.3f", costsPublic);
+	consequencesPrint(pEst);
 }
 
 void ChapThreeModeling::newIncumbentVote()
@@ -289,6 +282,16 @@ void ChapThreeModeling::newIncumbentVote()
 	if (cntForIncumbent >= mNumWinning_W or cntForChallenger < mNumWinning_W)
 	{
 		userInfLog("\033[1;32mIncumbent stays in office\033[0m");
+
+		if (mNumVotesDone == mNumVotesMax)
+			return;
+
+		userInfLog("  Government policies");
+		policiesPrint(&mStrategyIncumbent.proposal);
+
+		userInfLog("  Government state");
+		consequencesPrint(&mStrategyIncumbent.estimations);
+
 		return;
 	}
 
@@ -436,6 +439,35 @@ double ChapThreeModeling::randomDouble()
 {
 	uniform_real_distribution<double> dist(0.0, 1.0);
 	return dist(mRng);
+}
+
+void ChapThreeModeling::policiesPrint(Policies *pPol)
+{
+	if (!pPol)
+	{
+		procWrnLog("could not print policies");
+		return;
+	}
+
+	userInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
+	userInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
+	userInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
+}
+
+void ChapThreeModeling::consequencesPrint(Consequences *pCon)
+{
+	if (!pCon)
+	{
+		procWrnLog("could not print consequenzes");
+		return;
+	}
+
+	userInfLog("    Effort                   %10.3f", pCon->effort_e);
+	userInfLog("    Economic activity        %10.3f", pCon->activityEconomic_E);
+	userInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pCon->revenuesGov_R);
+	userInfLog("    Government costs         %10.3f", pCon->costsGov_M);
+	userInfLog("      Private                %10.3f", pCon->costsPrivate);
+	userInfLog("      Public                 %10.3f", pCon->costsPublic);
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

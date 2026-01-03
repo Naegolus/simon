@@ -84,7 +84,7 @@ private:
 	{
 		double leisure_l;
 		double effort_e;
-		double activityReturns_y;
+		double returnsActivity_y;
 		double payoffDisenfranchized;
 		double activityEconomic_E;
 		double revenuesGov_R;

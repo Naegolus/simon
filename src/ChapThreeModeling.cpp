@@ -253,8 +253,8 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 
 	pEst->leisure_l = 1 / (2 - pPol->rateTax_r);
 	pEst->effort_e = 1 - pEst->leisure_l;
-	pEst->activityReturns_y = (1 - pPol->rateTax_r) * pEst->effort_e;
-	pEst->payoffDisenfranchized = utility(pPol->goodsPublic_x, 0, pEst->activityReturns_y, pEst->leisure_l);
+	pEst->returnsActivity_y = (1 - pPol->rateTax_r) * pEst->effort_e;
+	pEst->payoffDisenfranchized = utility(pPol->goodsPublic_x, 0, pEst->returnsActivity_y, pEst->leisure_l);
 
 	pEst->activityEconomic_E = mNumCitizen_N * pEst->effort_e;
 	pEst->revenuesGov_R = pPol->rateTax_r * pEst->activityEconomic_E;
@@ -357,12 +357,12 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint, double
 	double utilityFromIncumbent_VL = feasableIncumbent ? utility(
 				pPolIncumbent->goodsPublic_x,
 				pSel->chosenByIncumbent ? pPolIncumbent->goodsPrivate_g : 0,
-				pConIncumbent->activityReturns_y,
+				pConIncumbent->returnsActivity_y,
 				pConIncumbent->leisure_l) : payoffReservation_v0;
 	double utilityFromChallenger_VC = feasableChallenger ? utility(
 				pPolChallenger->goodsPublic_x,
 				pPolChallenger->goodsPrivate_g,
-				pConChallenger->activityReturns_y,
+				pConChallenger->returnsActivity_y,
 				pConChallenger->leisure_l) : payoffReservation_v0;
 	double continuationFromIncumbent_ZL = continuationValue(&mStrategyIncumbent, pSel);
 	double continuationFromChallenger_ZC = continuationValue(&mStrategyChallenger, pSel);
@@ -415,7 +415,7 @@ double ChapThreeModeling::continuationValue(Strategy *pStrategy, Selector *pSel)
 	{
 		util = utility(pPol->goodsPublic_x,
 					pSel->chosenByIncumbent ? pPol->goodsPrivate_g : 0,
-					pCon->activityReturns_y,
+					pCon->returnsActivity_y,
 					pCon->leisure_l);
 
 		util /= 1 - mDelta;
@@ -424,12 +424,12 @@ double ChapThreeModeling::continuationValue(Strategy *pStrategy, Selector *pSel)
 
 	util = utility(pPol->goodsPublic_x,
 				pPol->goodsPrivate_g,
-				pCon->activityReturns_y,
+				pCon->returnsActivity_y,
 				pCon->leisure_l) * mLoyaltyNorm;
 
 	util += utility(pPol->goodsPublic_x,
 				0,
-				pCon->activityReturns_y,
+				pCon->returnsActivity_y,
 				pCon->leisure_l) * (1 - mLoyaltyNorm);
 
 	util /= 1 - mDelta;
@@ -496,7 +496,8 @@ void ChapThreeModeling::consequencesPrint(Consequences *pCon)
 		return;
 	}
 
-	userInfLog("    Effort                   %10.3f", pCon->effort_e);
+	userInfLog("    Activity returns         %10.3f", pCon->returnsActivity_y);
+	userInfLog("    Leisure                  %10.3f", pCon->leisure_l);
 	userInfLog("    Economic activity        %10.3f", pCon->activityEconomic_E);
 	userInfLog("    Government %srevenues      %10.3f\033[0m",
 					pCon->revenuesGov_R > pCon->costsGov_M ? "\033[1;32m" : "\033[1;33m",

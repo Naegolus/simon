@@ -83,16 +83,16 @@ Success ChapThreeModeling::process()
 	{
 	case StStart:
 
-		procInfLog("Modelling chapter three");
+		userInfLog("Modelling chapter three");
 
 		if (!mNumWinning_W || !mNumSelectorate_S || !mNumCitizen_N)
 			return procErrLog(-1, "invalid arguments");
 
-		procInfLog("Size of winning coalition    (W)      %6u", mNumWinning_W);
-		procInfLog("Size of selectorate          (S)      %6u", mNumSelectorate_S);
-		procInfLog("Number of citizens           (N)      %6u", mNumCitizen_N);
+		userInfLog("Size of winning coalition    (W)      %6u", mNumWinning_W);
+		userInfLog("Size of selectorate          (S)      %6u", mNumSelectorate_S);
+		userInfLog("Number of citizens           (N)      %6u", mNumCitizen_N);
 		mLoyaltyNorm = (double)mNumWinning_W / mNumSelectorate_S;
-		procInfLog("Loyalty norm                 (W/S)    %10.3f", mLoyaltyNorm);
+		userInfLog("Loyalty norm                 (W/S)    %10.3f", mLoyaltyNorm);
 
 		selectorsCreate();
 
@@ -130,7 +130,7 @@ Success ChapThreeModeling::process()
 
 void ChapThreeModeling::selectorsCreate()
 {
-	procInfLog("Creating selectors");
+	userInfLog("Creating selectors");
 
 	Selector sel;
 
@@ -149,7 +149,7 @@ void ChapThreeModeling::selectorsCreate()
 
 void ChapThreeModeling::challengerSet()
 {
-	procInfLog("---------------------------------------");
+	userInfLog("---------------------------------------");
 	while (mpChallenger = randomSelGet(), mpChallenger == mpIncumbent);
 }
 
@@ -165,11 +165,11 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 	if (forIncumbent and !mpIncumbent)
 	{
-		procInfLog("No leader");
+		userInfLog("No leader");
 		return;
 	}
 
-	procInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
+	userInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
 				forIncumbent ? "Incumbent" : "Challenger",
 				forIncumbent ? mpIncumbent->id : mpChallenger->id);
 
@@ -196,7 +196,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 		*pChosen = true;
 		pCoal->push_back(pSel);
-		//procInfLog("%2u.  %3u", pCoal->size(), pSel->id);
+		//userInfLog("%2u.  %3u", pCoal->size(), pSel->id);
 	}
 
 	list<Selector *>::iterator iSel = pCoal->begin();
@@ -208,9 +208,9 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	for (uint8_t i = 0; i < 4; ++i, ++iSel)
 		dInfo("%u,", (*iSel)->id);
 
-	procInfLog("  Assemble coalition W = {%s...}", buf);
+	userInfLog("  Assemble coalition W = {%s...}", buf);
 
-	procInfLog("  Creating proposal for policies");
+	userInfLog("  Creating proposal for policies");
 
 	Policies *pPol = &pStrategy->proposal;
 
@@ -218,16 +218,16 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	pPol->goodsPrivate_g = randomDouble();
 	pPol->goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
-	procInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
-	procInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
+	userInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
+	userInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
+	userInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
 
 	consequencesCalc(pStrategy);
 }
 
 void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 {
-	procInfLog("  Estimated consequences");
+	userInfLog("  Estimated consequences");
 
 	Policies *pPol = &pStrategy->proposal;
 	Consequences *pEst = &pStrategy->estimations;
@@ -242,10 +242,10 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 	pEst->costsGov_M = pPol->goodsPublic_x * mCostPublic +
 					pPol->goodsPrivate_g * pStrategy->coalition.size();
 
-	procInfLog("    Effort                   %10.3f", pEst->effort_e);
-	procInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
-	procInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pEst->revenuesGov_R);
-	procInfLog("    Government costs         %10.3f", pEst->costsGov_M);
+	userInfLog("    Effort                   %10.3f", pEst->effort_e);
+	userInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
+	userInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pEst->revenuesGov_R);
+	userInfLog("    Government costs         %10.3f", pEst->costsGov_M);
 }
 
 void ChapThreeModeling::newIncumbentVote()
@@ -267,11 +267,11 @@ void ChapThreeModeling::newIncumbentVote()
 
 	if (cntForIncumbent >= mNumWinning_W or cntForChallenger < mNumWinning_W)
 	{
-		procInfLog("\033[1;32mIncumbent stays in office\033[0m");
+		userInfLog("\033[1;32mIncumbent stays in office\033[0m");
 		return;
 	}
 
-	procInfLog("\033[1;33mChallenger takes office\033[0m");
+	userInfLog("\033[1;33mChallenger takes office\033[0m");
 
 	mpIncumbent = mpChallenger;
 	mpChallenger = NULL;
@@ -299,36 +299,35 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel)
 	Policies *pPolChallenger = &mStrategyChallenger.proposal;
 	Consequences *pConIncumbent = &mStrategyIncumbent.estimations;
 	Consequences *pConChallenger = &mStrategyChallenger.estimations;
+	bool feasableIncumbent = pConIncumbent->revenuesGov_R > pConIncumbent->costsGov_M;
+	bool feasableChallenger = pConChallenger->revenuesGov_R > pConChallenger->costsGov_M;
 	double payoffReservation_v0 = 0.0;
-	double utilityFromIncumbent_VL = utility(
+	double utilityFromIncumbent_VL = feasableIncumbent ? utility(
 				pPolIncumbent->goodsPublic_x,
 				pSel->chosenByIncumbent ? pPolIncumbent->goodsPrivate_g : 0,
 				pConIncumbent->activityReturns_y,
-				pConIncumbent->leisure_l);
-	double utilityFromChallenger_VC = utility(
+				pConIncumbent->leisure_l) : payoffReservation_v0;
+	double utilityFromChallenger_VC = feasableChallenger ? utility(
 				pPolChallenger->goodsPublic_x,
 				pPolChallenger->goodsPrivate_g,
 				pConChallenger->activityReturns_y,
-				pConChallenger->leisure_l);
+				pConChallenger->leisure_l) : payoffReservation_v0;
 	double continuationFromIncumbent_ZL = continuationValue(&mStrategyIncumbent, pSel);
 	double continuationFromChallenger_ZC = continuationValue(&mStrategyChallenger, pSel);
-	bool feasableIncumbent = pConIncumbent->revenuesGov_R > pConIncumbent->costsGov_M;
-	bool feasableChallenger = pConChallenger->revenuesGov_R > pConChallenger->costsGov_M;
-	double payoffFromIncumbent;
-	double payoffFromChallenger;
+	double payoffFromIncumbent_UL = utilityFromIncumbent_VL +  mDelta * continuationFromIncumbent_ZL;
+	double payoffFromChallenger_UC = utilityFromChallenger_VC + mDelta * continuationFromChallenger_ZC;
 	bool ok = false;
 
-	payoffFromIncumbent = feasableIncumbent ? utilityFromIncumbent_VL : payoffReservation_v0 +
-						mDelta * continuationFromIncumbent_ZL;
-	payoffFromChallenger = feasableChallenger ? utilityFromChallenger_VC : payoffReservation_v0 +
-						mDelta * continuationFromChallenger_ZC;
+	ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
 
-	ok = payoffFromChallenger > payoffFromIncumbent;
-
-	procInfLog("Selector %2u, %c%c: UL=%6.3f, UC=%6.3f => %c",
+	userInfLog("Selector %2u, %c%c: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %c",
 				pSel->id,
-				payoffFromIncumbent,
-				payoffFromChallenger,
+				utilityFromIncumbent_VL,
+				utilityFromChallenger_VC,
+				continuationFromIncumbent_ZL,
+				continuationFromChallenger_ZC,
+				payoffFromIncumbent_UL,
+				payoffFromChallenger_UC,
 				pSel->chosenByIncumbent ? 'L' : '-',
 				pSel->chosenByChallenger ? 'C' : '-',
 				ok ? 'C' : 'L');

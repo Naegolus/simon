@@ -98,13 +98,6 @@ Success ChapThreeModeling::process()
 
 		selectorsCreate();
 
-		challengerSet();
-		strategyRandomCreate(&mStrategyIncumbent);
-		strategyRandomCreate(&mStrategyChallenger);
-		newIncumbentVote();
-		lawEnact();
-		resultsDevelop();
-
 		mState = StMain;
 
 		break;
@@ -266,11 +259,12 @@ void ChapThreeModeling::newIncumbentVote()
 	uint16_t cntForIncumbent = 0;
 	uint16_t cntForChallenger = 0;
 	char maskPrint = 0;
+	double payoffMax = 0;
 
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
-		ok = challengerAccept(&(*iSel), maskPrint);
+		ok = challengerAccept(&(*iSel), maskPrint, payoffMax);
 		if (ok)
 			++cntForChallenger;
 		else
@@ -284,7 +278,12 @@ void ChapThreeModeling::newIncumbentVote()
 		userInfLog("\033[1;32mIncumbent stays in office\033[0m");
 
 		if (mNumVotesDone == mNumVotesMax)
+		{
+			userInfLog("");
+			userInfLog("Payoff W: \033[4m%.3f\033[0m", payoffMax);
+			userInfLog("");
 			return;
+		}
 
 		userInfLog("  Government policies");
 		policiesPrint(&mStrategyIncumbent.proposal);
@@ -310,7 +309,7 @@ void ChapThreeModeling::newIncumbentVote()
 	mpChallenger = NULL;
 }
 
-bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint)
+bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint, double &payoffMax)
 {
 	if (!pSel)
 		return false;
@@ -341,20 +340,25 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint)
 	double payoffFromChallenger_UC = utilityFromChallenger_VC + mDelta * continuationFromChallenger_ZC;
 	char bitPrint = 1 << ((pSel->chosenByIncumbent ? 2 : 0) + (pSel->chosenByChallenger ? 1 : 0));
 	bool ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
+	double payoffBest = PMAX(payoffFromIncumbent_UL, payoffFromChallenger_UC);
+
+	if (payoffBest > payoffMax)
+		payoffMax = payoffBest;
 
 	if (maskPrint & bitPrint)
 		return ok;
 
-	userInfLog("Selector %2u, %s%s: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %s%c\033[0m",
+	userInfLog("Selector %2u, %s%s: (%.3f + %.3f) %.3f %c %.3f (%.3f + %.3f) => %s%c\033[0m",
 				pSel->id,
+				pSel->chosenByIncumbent ? "\033[1;36mL\033[0m" : "-",
+				pSel->chosenByChallenger ? "C" : "-",
 				utilityFromIncumbent_VL,
 				mDelta * continuationFromIncumbent_ZL,
 				payoffFromIncumbent_UL,
+				ok ? '<' : '>',
+				payoffFromChallenger_UC,
 				utilityFromChallenger_VC,
 				mDelta * continuationFromChallenger_ZC,
-				payoffFromChallenger_UC,
-				pSel->chosenByIncumbent ? "\033[1;36mL\033[0m" : "-",
-				pSel->chosenByChallenger ? "C" : "-",
 				pSel->chosenByIncumbent and ok ? "\033[1;33m" : "",
 				ok ? 'C' : 'L');
 

@@ -1,0 +1,17 @@
+
+$ ./tools-dev/start/default.sh --verbosity 4 --core-dump
+ninja: no work to do.
+2026-01-03  19:50:54.677 >9.999  WRN  servicesStart         0x5a79f16bf830 SimonSupervising.cpp:230       enable core dumps
+2026-01-03  19:50:54.682 +0.005  DBG  cmdReg                SystemCommanding.cpp:1617                     registering command levelLog
+2026-01-03  19:50:54.682 +0.000  DBG  cmdReg                SystemCommanding.cpp:1646                     registering command levelLog: done
+2026-01-03  19:50:54.682 +0.000  DBG  cmdReg                SystemCommanding.cpp:1617                     registering command levelLogSys
+2026-01-03  19:50:54.682 +0.000  DBG  cmdReg                SystemCommanding.cpp:1646                     registering command levelLogSys: done
+
+Modelling chapter three
+Size of winning coalition    (W)          10
+Size of selectorate          (S)          50
+Number of citizens           (N)        1000
+Loyalty norm                 (W/S)         0.200
+2026-01-03  19:50:54.799 +0.117  DBG  process               0x5a79f16c1b80 ChapThreeModeling.cpp:127      Voting done
+2026-01-03  19:50:54.799 +0.000  DBG  process               0x5a79f16bfd20 MsgDispatching.cpp:80          Simulation finished
+

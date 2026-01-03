@@ -124,7 +124,7 @@ Success ChapThreeModeling::process()
 		if (mNumVotesDone < mNumVotesMax)
 			break;
 
-		//procDbgLog("Voting done");
+		procDbgLog("Voting done");
 
 		return Positive;
 

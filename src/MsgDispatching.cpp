@@ -77,7 +77,7 @@ Success MsgDispatching::process()
 		if (success == Pending)
 			break;
 
-		//procDbgLog("Simulation finished");
+		procDbgLog("Simulation finished");
 
 		return Positive;
 

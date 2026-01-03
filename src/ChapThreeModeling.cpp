@@ -239,13 +239,16 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 
 	pEst->activityEconomic_E = mNumCitizen_N * pEst->effort_e;
 	pEst->revenuesGov_R = pPol->rateTax_r * pEst->activityEconomic_E;
-	pEst->costsGov_M = pPol->goodsPublic_x * mCostPublic +
-					pPol->goodsPrivate_g * pStrategy->coalition.size();
+	double costsPrivate = pPol->goodsPrivate_g * pStrategy->coalition.size();
+	double costsPublic = pPol->goodsPublic_x * mCostPublic;
+	pEst->costsGov_M = costsPrivate + costsPublic;
 
 	userInfLog("    Effort                   %10.3f", pEst->effort_e);
 	userInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
 	userInfLog("    Government \033[1;32mrevenues      %10.3f\033[0m", pEst->revenuesGov_R);
 	userInfLog("    Government costs         %10.3f", pEst->costsGov_M);
+	userInfLog("      Private                %10.3f", costsPrivate);
+	userInfLog("      Public                 %10.3f", costsPublic);
 }
 
 void ChapThreeModeling::newIncumbentVote()
@@ -254,11 +257,12 @@ void ChapThreeModeling::newIncumbentVote()
 	bool ok;
 	uint16_t cntForIncumbent = 0;
 	uint16_t cntForChallenger = 0;
+	char maskPrint = 0;
 
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
-		ok = challengerAccept(&(*iSel));
+		ok = challengerAccept(&(*iSel), maskPrint);
 		if (ok)
 			++cntForChallenger;
 		else
@@ -287,7 +291,7 @@ void ChapThreeModeling::newIncumbentVote()
 	}
 }
 
-bool ChapThreeModeling::challengerAccept(Selector *pSel)
+bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint)
 {
 	if (!pSel)
 		return false;
@@ -316,11 +320,13 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel)
 	double continuationFromChallenger_ZC = continuationValue(&mStrategyChallenger, pSel);
 	double payoffFromIncumbent_UL = utilityFromIncumbent_VL +  mDelta * continuationFromIncumbent_ZL;
 	double payoffFromChallenger_UC = utilityFromChallenger_VC + mDelta * continuationFromChallenger_ZC;
-	bool ok = false;
+	char bitPrint = 1 << ((pSel->chosenByIncumbent ? 2 : 0) + (pSel->chosenByChallenger ? 1 : 0));
+	bool ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
 
-	ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
+	if (maskPrint & bitPrint)
+		return ok;
 
-	userInfLog("Selector %2u, %c%c: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %s%c\033[0m",
+	userInfLog("Selector %2u, %s%s: %.3f + %.3f = %.3f | %.3f + %.3f = %.3f => %s%c\033[0m",
 				pSel->id,
 				utilityFromIncumbent_VL,
 				mDelta * continuationFromIncumbent_ZL,
@@ -328,10 +334,12 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel)
 				utilityFromChallenger_VC,
 				mDelta * continuationFromChallenger_ZC,
 				payoffFromChallenger_UC,
-				pSel->chosenByIncumbent ? 'L' : '-',
-				pSel->chosenByChallenger ? 'C' : '-',
+				pSel->chosenByIncumbent ? "\033[1;36mL\033[0m" : "-",
+				pSel->chosenByChallenger ? "C" : "-",
 				pSel->chosenByIncumbent and ok ? "\033[1;33m" : "",
 				ok ? 'C' : 'L');
+
+	maskPrint |= bitPrint;
 
 	return ok;
 }

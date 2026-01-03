@@ -52,6 +52,8 @@ ChapThreeModeling::ChapThreeModeling()
 	, mDelta(0.01)
 	, mAgeWin(10)
 	, mLoyaltyNorm(0.0)
+	, mNumVotesDone(0)
+	, mNumVotesMax(20)
 	, mRng(random_device{}())
 	, mSelectors()
 	, mpIncumbent(NULL)
@@ -109,11 +111,13 @@ Success ChapThreeModeling::process()
 	case StMain:
 
 		challengerSet();
-		strategyRandomCreate(&mStrategyIncumbent);
 		strategyRandomCreate(&mStrategyChallenger);
 		newIncumbentVote();
 		lawEnact();
 		resultsDevelop();
+
+		if (mNumVotesDone < mNumVotesMax)
+			break;
 
 		mState = StNop;
 
@@ -149,7 +153,7 @@ void ChapThreeModeling::selectorsCreate()
 
 void ChapThreeModeling::challengerSet()
 {
-	userInfLog("---------------------------------------");
+	userInfLog("-------------------------------------------------- Period %u", mNumVotesDone);
 	while (mpChallenger = randomSelGet(), mpChallenger == mpIncumbent);
 }
 
@@ -187,7 +191,11 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 		if (*pChosen)
 		{
-			//procWrnLog("chosen already");
+#if 0
+			procWrnLog("Selector %u already chosen by %s",
+						pSel->id,
+						forIncumbent ? "incumbent" : "challenger");
+#endif
 			continue;
 		}
 
@@ -269,6 +277,8 @@ void ChapThreeModeling::newIncumbentVote()
 			++cntForIncumbent;
 	}
 
+	++mNumVotesDone;
+
 	if (cntForIncumbent >= mNumWinning_W or cntForChallenger < mNumWinning_W)
 	{
 		userInfLog("\033[1;32mIncumbent stays in office\033[0m");
@@ -277,18 +287,19 @@ void ChapThreeModeling::newIncumbentVote()
 
 	userInfLog("\033[1;33mChallenger takes office\033[0m");
 
-	mpIncumbent = mpChallenger;
-	mpChallenger = NULL;
-
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
+		iSel->chosenByChallenger = false;
+
 		if (!iSel->chosenByChallenger)
 			continue;
 
-		iSel->chosenByChallenger = false;
 		iSel->chosenByIncumbent = true;
 	}
+
+	mpIncumbent = mpChallenger;
+	mpChallenger = NULL;
 }
 
 bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint)

@@ -124,6 +124,8 @@ private:
 	/* member variables */
 	//uint32_t mStartMs;
 	double mLoyaltyNorm;
+	uint16_t mNumVotesDone;
+	uint16_t mNumVotesMax;
 	std::mt19937 mRng;
 	std::vector<Selector> mSelectors;
 	Selector *mpIncumbent;

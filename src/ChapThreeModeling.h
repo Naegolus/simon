@@ -124,9 +124,9 @@ private:
 	uint32_t randomInt(uint32_t nMax);
 	double randomDouble();
 
+	void resultsPrint();
 	void policiesPrint(Policies *pPol);
 	void consequencesPrint(Consequences *pCon);
-	void resultsPrint();
 
 	/* member variables */
 	//uint32_t mStartMs;

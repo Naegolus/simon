@@ -40,7 +40,7 @@ dProcessStateEnum(ProcState);
 dProcessStateStr(ProcState);
 #endif
 
-#define dVoteProcessPrint	0
+#define dVoteProcessPrint 0
 
 #if dVoteProcessPrint
 #define procVoteLog	userInfLog
@@ -97,7 +97,9 @@ Success ChapThreeModeling::process()
 	case StStart:
 
 		userInfLog("");
+		userInfLog("=====================================================");
 		userInfLog("Modelling chapter three");
+		userInfLog("");
 
 		if (!mNumWinning_W || !mNumSelectorate_S || !mNumCitizen_N)
 			return procErrLog(-1, "invalid arguments");
@@ -105,8 +107,10 @@ Success ChapThreeModeling::process()
 		userInfLog("Size of winning coalition    (W)      %6u", mNumWinning_W);
 		userInfLog("Size of selectorate          (S)      %6u", mNumSelectorate_S);
 		userInfLog("Number of citizens           (N)      %6u", mNumCitizen_N);
+		userInfLog("Number of votes                       %6u", mNumVotesMax);
 		mLoyaltyNorm = (double)mNumWinning_W / mNumSelectorate_S;
 		userInfLog("Loyalty norm                 (W/S)    %10.3f", mLoyaltyNorm);
+		userInfLog("Cost per public good                  %10.3f", mCostPublic);
 
 		selectorsCreate();
 
@@ -462,6 +466,26 @@ double ChapThreeModeling::randomDouble()
 	return dist(mRng);
 }
 
+void ChapThreeModeling::resultsPrint()
+{
+	Policies *pPol = &mStrategyIncumbent.proposal;
+	Consequences *pCon = &mStrategyIncumbent.estimations;
+
+	userInfLog("");
+	userInfLog("=====================================================");
+	userInfLog("Results");
+	userInfLog("");
+	userInfLog("  Final policies");
+	policiesPrint(pPol);
+	userInfLog("");
+	userInfLog("  Consequences");
+	consequencesPrint(pCon);
+	userInfLog("    Payoff W                          %10.3f", mPayoffMax);
+	userInfLog("");
+	userInfLog("=====================================================");
+	userInfLog("");
+}
+
 void ChapThreeModeling::policiesPrint(Policies *pPol)
 {
 	if (!pPol)
@@ -470,9 +494,9 @@ void ChapThreeModeling::policiesPrint(Policies *pPol)
 		return;
 	}
 
-	userInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
-	userInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
-	userInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
+	userInfLog("    Tax rate                          %10.3f", pPol->rateTax_r);
+	userInfLog("    Private goods                     %10.3f", pPol->goodsPrivate_g);
+	userInfLog("    Public goods                      %10.3f", pPol->goodsPublic_x);
 }
 
 void ChapThreeModeling::consequencesPrint(Consequences *pCon)
@@ -483,36 +507,16 @@ void ChapThreeModeling::consequencesPrint(Consequences *pCon)
 		return;
 	}
 
-	userInfLog("    Activity returns         %10.3f", pCon->returnsActivity_y);
-	userInfLog("    Leisure                  %10.3f", pCon->leisure_l);
-	userInfLog("    Economic activity        %10.3f", pCon->activityEconomic_E);
-	userInfLog("    Government %srevenues      %10.3f\033[0m",
+	userInfLog("    Activity returns                  %10.3f", pCon->returnsActivity_y);
+	userInfLog("    Leisure                           %10.3f", pCon->leisure_l);
+	userInfLog("    Economic activity                 %10.3f", pCon->activityEconomic_E);
+	userInfLog("    Government %srevenues               %10.3f\033[0m",
 					pCon->revenuesGov_R > pCon->costsGov_M ? "\033[1;32m" : "\033[1;33m",
 					pCon->revenuesGov_R);
-	userInfLog("    Government costs         %10.3f", pCon->costsGov_M);
-	userInfLog("      Private                %10.3f", pCon->costsPrivate);
-	userInfLog("      Public                 %10.3f", pCon->costsPublic);
-	userInfLog("    Payoff L                 %10.3f", pCon->payoffIncumbent);
-}
-
-void ChapThreeModeling::resultsPrint()
-{
-	Policies *pPol = &mStrategyIncumbent.proposal;
-	Consequences *pCon = &mStrategyIncumbent.estimations;
-
-	userInfLog("");
-	userInfLog("=====================================================");
-	userInfLog("Number of votes: %u", mNumVotesMax);
-	userInfLog("");
-	userInfLog("  Final policies");
-	policiesPrint(pPol);
-	userInfLog("");
-	userInfLog("  Consequences");
-	consequencesPrint(pCon);
-	userInfLog("    Payoff W                 %10.3f", mPayoffMax);
-	userInfLog("");
-	userInfLog("=====================================================");
-	userInfLog("");
+	userInfLog("    Government costs                  %10.3f", pCon->costsGov_M);
+	userInfLog("      Private                         %10.3f", pCon->costsPrivate);
+	userInfLog("      Public                          %10.3f", pCon->costsPublic);
+	userInfLog("    Payoff L                          %10.3f", pCon->payoffIncumbent);
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

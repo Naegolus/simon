@@ -54,7 +54,7 @@ Success MsgDispatching::process()
 {
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
-	//Success success;
+	Success success;
 #if 0
 	dStateTrace;
 #endif
@@ -72,6 +72,14 @@ Success MsgDispatching::process()
 
 		break;
 	case StMain:
+
+		success = mpThree->success();
+		if (success == Pending)
+			break;
+
+		//procDbgLog("Simulation finished");
+
+		return Positive;
 
 		break;
 	case StNop:

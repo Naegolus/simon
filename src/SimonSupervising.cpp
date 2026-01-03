@@ -83,7 +83,7 @@ Success SimonSupervising::process()
 {
 	//uint32_t curTimeMs = millis();
 	//uint32_t diffMs = curTimeMs - mStartMs;
-	//Success success;
+	Success success;
 	bool ok;
 #if 0
 	dStateTrace;
@@ -100,6 +100,12 @@ Success SimonSupervising::process()
 
 		break;
 	case StMain:
+
+		success = mpApp->success();
+		if (success == Pending)
+			break;
+
+		return Positive;
 
 		break;
 	default:

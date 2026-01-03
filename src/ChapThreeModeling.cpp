@@ -124,7 +124,9 @@ Success ChapThreeModeling::process()
 		if (mNumVotesDone < mNumVotesMax)
 			break;
 
-		mState = StNop;
+		//procDbgLog("Voting done");
+
+		return Positive;
 
 		break;
 	case StNop:

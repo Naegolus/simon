@@ -124,6 +124,8 @@ Success ChapThreeModeling::process()
 		if (mNumVotesDone < mNumVotesMax)
 			break;
 
+		resultsPrint();
+
 		procDbgLog("Voting done");
 
 		return Positive;
@@ -277,12 +279,13 @@ void ChapThreeModeling::newIncumbentVote()
 	uint16_t cntForIncumbent = 0;
 	uint16_t cntForChallenger = 0;
 	char maskPrint = 0;
-	double payoffMax = 0;
+
+	mPayoffMax = 0;
 
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
-		ok = challengerAccept(&(*iSel), maskPrint, payoffMax);
+		ok = challengerAccept(&(*iSel), maskPrint);
 		if (ok)
 			++cntForChallenger;
 		else
@@ -296,32 +299,13 @@ void ChapThreeModeling::newIncumbentVote()
 		procVoteLog("\033[1;32mIncumbent stays in office\033[0m");
 
 		if (mNumVotesDone == mNumVotesMax)
-		{
-			Policies *pPol = &mStrategyIncumbent.proposal;
-			Consequences *pCon = &mStrategyIncumbent.estimations;
-
-			userInfLog("");
-			userInfLog("=====================================================");
-			userInfLog("Number of votes: %u", mNumVotesMax);
-			userInfLog("");
-			userInfLog("  Final policies");
-			policiesPrint(pPol);
-			userInfLog("");
-			userInfLog("  Consequences");
-			consequencesPrint(pCon);
-			userInfLog("    Payoff W                 %10.3f", payoffMax);
-			userInfLog("");
-			userInfLog("=====================================================");
-
 			return;
-		}
 
+#if dVoteProcessPrint
 		procVoteLog("  Government policies");
-#if dVoteProcessPrint
 		policiesPrint(&mStrategyIncumbent.proposal);
-#endif
+
 		procVoteLog("  Government state");
-#if dVoteProcessPrint
 		consequencesPrint(&mStrategyIncumbent.estimations);
 #endif
 		return;
@@ -342,7 +326,7 @@ void ChapThreeModeling::newIncumbentVote()
 	mpChallenger = NULL;
 }
 
-bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint, double &payoffMax)
+bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint)
 {
 	if (!pSel)
 		return false;
@@ -375,8 +359,8 @@ bool ChapThreeModeling::challengerAccept(Selector *pSel, char &maskPrint, double
 	bool ok = payoffFromChallenger_UC > payoffFromIncumbent_UL;
 	double payoffBest = PMAX(payoffFromIncumbent_UL, payoffFromChallenger_UC);
 
-	if (payoffBest > payoffMax)
-		payoffMax = payoffBest;
+	if (payoffBest > mPayoffMax)
+		mPayoffMax = payoffBest;
 
 	if (maskPrint & bitPrint)
 		return ok;
@@ -509,6 +493,25 @@ void ChapThreeModeling::consequencesPrint(Consequences *pCon)
 	userInfLog("      Private                %10.3f", pCon->costsPrivate);
 	userInfLog("      Public                 %10.3f", pCon->costsPublic);
 	userInfLog("    Payoff L                 %10.3f", pCon->payoffIncumbent);
+}
+
+void ChapThreeModeling::resultsPrint()
+{
+	Policies *pPol = &mStrategyIncumbent.proposal;
+	Consequences *pCon = &mStrategyIncumbent.estimations;
+
+	userInfLog("");
+	userInfLog("=====================================================");
+	userInfLog("Number of votes: %u", mNumVotesMax);
+	userInfLog("");
+	userInfLog("  Final policies");
+	policiesPrint(pPol);
+	userInfLog("");
+	userInfLog("  Consequences");
+	consequencesPrint(pCon);
+	userInfLog("    Payoff W                 %10.3f", mPayoffMax);
+	userInfLog("");
+	userInfLog("=====================================================");
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

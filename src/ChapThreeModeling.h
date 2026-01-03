@@ -110,7 +110,7 @@ private:
 	void strategyRandomCreate(Strategy *pStrategy);
 	void consequencesCalc(Strategy *pStrategy);
 	void newIncumbentVote();
-	bool challengerAccept(Selector *pSel, char &maskPrint, double &payoffMax);
+	bool challengerAccept(Selector *pSel, char &maskPrint);
 	double continuationValue(Strategy *pStrategy, Selector *pSel);
 	void lawEnact();
 	void resultsDevelop();
@@ -126,10 +126,12 @@ private:
 
 	void policiesPrint(Policies *pPol);
 	void consequencesPrint(Consequences *pCon);
+	void resultsPrint();
 
 	/* member variables */
 	//uint32_t mStartMs;
 	double mLoyaltyNorm;
+	double mPayoffMax;
 	uint16_t mNumVotesDone;
 	uint16_t mNumVotesMax;
 	std::mt19937 mRng;

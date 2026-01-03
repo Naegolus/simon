@@ -146,7 +146,7 @@ void ChapThreeModeling::selectorsCreate()
 
 void ChapThreeModeling::challengerSet()
 {
-	userInfLog("-------------------------------------------------- Period %u", mNumVotesDone);
+	userInfLog("-------------------------------------------------- Period %u", mNumVotesDone + 1);
 
 	vector<Selector>::iterator iSel;
 
@@ -279,9 +279,14 @@ void ChapThreeModeling::newIncumbentVote()
 
 		if (mNumVotesDone == mNumVotesMax)
 		{
+			Consequences *pCon = &mStrategyIncumbent.estimations;
+
 			userInfLog("");
-			userInfLog("Payoff W: \033[4m%.3f\033[0m", payoffMax);
-			userInfLog("");
+			userInfLog("---------------------------------------");
+			userInfLog("Payoff W                %12.3f", payoffMax);
+			userInfLog("Economic activity E     %12.3f", pCon->activityEconomic_E);
+			userInfLog("---------------------------------------");
+
 			return;
 		}
 

@@ -53,7 +53,7 @@ ChapThreeModeling::ChapThreeModeling()
 	, mAgeWin(10)
 	, mLoyaltyNorm(0.0)
 	, mNumVotesDone(0)
-	, mNumVotesMax(20)
+	, mNumVotesMax(40)
 	, mRng(random_device{}())
 	, mSelectors()
 	, mpIncumbent(NULL)
@@ -154,7 +154,14 @@ void ChapThreeModeling::selectorsCreate()
 void ChapThreeModeling::challengerSet()
 {
 	userInfLog("-------------------------------------------------- Period %u", mNumVotesDone);
+
+	vector<Selector>::iterator iSel;
+
 	while (mpChallenger = randomSelGet(), mpChallenger == mpIncumbent);
+
+	iSel = mSelectors.begin();
+	for (; iSel != mSelectors.end(); ++iSel)
+		iSel->chosenByChallenger = false;
 }
 
 void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
@@ -290,13 +297,11 @@ void ChapThreeModeling::newIncumbentVote()
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
+		iSel->chosenByIncumbent = iSel->chosenByChallenger;
 		iSel->chosenByChallenger = false;
-
-		if (!iSel->chosenByChallenger)
-			continue;
-
-		iSel->chosenByIncumbent = true;
 	}
+
+	mStrategyIncumbent = mStrategyChallenger;
 
 	mpIncumbent = mpChallenger;
 	mpChallenger = NULL;

@@ -91,6 +91,7 @@ private:
 		double costsPrivate;
 		double costsPublic;
 		double costsGov_M;
+		double payoffIncumbent;
 	};
 
 	struct Strategy

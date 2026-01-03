@@ -263,6 +263,7 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 	pEst->costsPrivate = pPol->goodsPrivate_g * pStrategy->coalition.size();
 	pEst->costsPublic = pPol->goodsPublic_x * mCostPublic;
 	pEst->costsGov_M = pEst->costsPrivate + pEst->costsPublic;
+	pEst->payoffIncumbent = pEst->revenuesGov_R - pEst->costsGov_M;
 
 #if dVoteProcessPrint
 	consequencesPrint(pEst);
@@ -507,6 +508,7 @@ void ChapThreeModeling::consequencesPrint(Consequences *pCon)
 	userInfLog("    Government costs         %10.3f", pCon->costsGov_M);
 	userInfLog("      Private                %10.3f", pCon->costsPrivate);
 	userInfLog("      Public                 %10.3f", pCon->costsPublic);
+	userInfLog("    Payoff L                 %10.3f", pCon->payoffIncumbent);
 }
 
 void ChapThreeModeling::processInfo(char *pBuf, char *pBufEnd)

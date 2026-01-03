@@ -283,11 +283,21 @@ void ChapThreeModeling::newIncumbentVote()
 			Consequences *pCon = &mStrategyIncumbent.estimations;
 
 			userInfLog("");
+			userInfLog("=====================================================");
+			userInfLog("Policies");
+			userInfLog("");
+			userInfLog("Tax                     (r)       %12.3f", pPol->rateTax_r);
+			userInfLog("Private goods           (g)       %12.3f", pPol->goodsPrivate_g);
+			userInfLog("Public goods            (x)       %12.3f", pPol->goodsPublic_x);
+			userInfLog("");
 			userInfLog("-----------------------------------------------------");
+			userInfLog("Consequences");
+			userInfLog("");
 			userInfLog("Payoff W                (U_L)     %12.3f", payoffMax);
-			userInfLog("Tax                     (r  )     %12.3f", pPol->rateTax_r);
-			userInfLog("Economic activity       (E  )     %12.3f", pCon->activityEconomic_E);
-			userInfLog("-----------------------------------------------------");
+			userInfLog("Leisure                 (l)       %12.3f", pCon->leisure_l);
+			userInfLog("Economic activity       (E)       %12.3f", pCon->activityEconomic_E);
+			userInfLog("");
+			userInfLog("=====================================================");
 
 			return;
 		}

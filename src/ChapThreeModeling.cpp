@@ -51,11 +51,12 @@ ChapThreeModeling::ChapThreeModeling()
 	, mCostPublic(100)
 	, mDelta(0.01)
 	, mAgeWin(10)
+	, mLoyaltyNorm(0.0)
 	, mRng(random_device{}())
 	, mSelectors()
-	, mpLeader(NULL)
+	, mpIncumbent(NULL)
 	, mpChallenger(NULL)
-	, mStrategyLeader()
+	, mStrategyIncumbent()
 	, mStrategyChallenger()
 	, mpCoalition(NULL)
 	, mpLaw(NULL)
@@ -90,14 +91,15 @@ Success ChapThreeModeling::process()
 		procInfLog("Size of winning coalition    (W)      %6u", mNumWinning_W);
 		procInfLog("Size of selectorate          (S)      %6u", mNumSelectorate_S);
 		procInfLog("Number of citizens           (N)      %6u", mNumCitizen_N);
-		procInfLog("Loyalty norm                 (W/S)    %10.3f", (double)mNumWinning_W / mNumSelectorate_S);
+		mLoyaltyNorm = (double)mNumWinning_W / mNumSelectorate_S;
+		procInfLog("Loyalty norm                 (W/S)    %10.3f", mLoyaltyNorm);
 
 		selectorsCreate();
 
 		challengerSet();
-		strategyRandomCreate(&mStrategyLeader);
+		strategyRandomCreate(&mStrategyIncumbent);
 		strategyRandomCreate(&mStrategyChallenger);
-		newLeaderVote();
+		newIncumbentVote();
 		lawEnact();
 		resultsDevelop();
 
@@ -105,6 +107,15 @@ Success ChapThreeModeling::process()
 
 		break;
 	case StMain:
+
+		challengerSet();
+		strategyRandomCreate(&mStrategyIncumbent);
+		strategyRandomCreate(&mStrategyChallenger);
+		newIncumbentVote();
+		lawEnact();
+		resultsDevelop();
+
+		mState = StNop;
 
 		break;
 	case StNop:
@@ -129,7 +140,7 @@ void ChapThreeModeling::selectorsCreate()
 	for (uint16_t i = 0; i < mNumSelectorate_S; ++i)
 	{
 		sel.id = i + 1;
-		sel.chosenByLeader = false;
+		sel.chosenByIncumbent = false;
 		sel.chosenByChallenger = false;
 
 		mSelectors.push_back(sel);
@@ -138,7 +149,8 @@ void ChapThreeModeling::selectorsCreate()
 
 void ChapThreeModeling::challengerSet()
 {
-	while (mpChallenger = randomSelGet(), mpChallenger == mpLeader);
+	procInfLog("---------------------------------------");
+	while (mpChallenger = randomSelGet(), mpChallenger == mpIncumbent);
 }
 
 void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
@@ -149,17 +161,17 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 		return;
 	}
 
-	bool isLeader = pStrategy == &mStrategyLeader;
+	bool forIncumbent = pStrategy == &mStrategyIncumbent;
 
-	if (isLeader and !mpLeader)
+	if (forIncumbent and !mpIncumbent)
 	{
 		procInfLog("No leader");
 		return;
 	}
 
 	procInfLog("\033[1;36m%s\033[0m (%u) picks strategy",
-				isLeader ? "Leader" : "Challenger",
-				isLeader ? mpLeader->id : mpChallenger->id);
+				forIncumbent ? "Incumbent" : "Challenger",
+				forIncumbent ? mpIncumbent->id : mpChallenger->id);
 
 	list<Selector *> *pCoal = &pStrategy->coalition;
 	Selector *pSel;
@@ -171,7 +183,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 	{
 		pSel = randomSelGet();
 
-		pChosen = isLeader ? &pSel->chosenByLeader : &pSel->chosenByChallenger;
+		pChosen = forIncumbent ? &pSel->chosenByIncumbent : &pSel->chosenByChallenger;
 
 		if (*pChosen)
 		{
@@ -179,7 +191,7 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 			continue;
 		}
 
-		if (pSel == mpLeader || pSel == mpChallenger)
+		if (pSel == mpIncumbent || pSel == mpChallenger)
 			continue;
 
 		*pChosen = true;
@@ -200,15 +212,15 @@ void ChapThreeModeling::strategyRandomCreate(Strategy *pStrategy)
 
 	procInfLog("  Creating proposal for policies");
 
-	Policies *pProp = &pStrategy->proposal;
+	Policies *pPol = &pStrategy->proposal;
 
-	pProp->rateTax_r = randomDouble();
-	pProp->goodsPrivate_g = randomDouble();
-	pProp->goodsPublic_x = randomDouble();
+	pPol->rateTax_r = randomDouble();
+	pPol->goodsPrivate_g = randomDouble();
+	pPol->goodsPublic_x = randomDouble();
 
-	procInfLog("    Tax rate                 %10.3f", pProp->rateTax_r);
-	procInfLog("    Private goods            %10.3f", pProp->goodsPrivate_g);
-	procInfLog("    Public goods             %10.3f", pProp->goodsPublic_x);
+	procInfLog("    Tax rate                 %10.3f", pPol->rateTax_r);
+	procInfLog("    Private goods            %10.3f", pPol->goodsPrivate_g);
+	procInfLog("    Public goods             %10.3f", pPol->goodsPublic_x);
 
 	consequencesCalc(pStrategy);
 }
@@ -217,18 +229,18 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 {
 	procInfLog("  Estimated consequences");
 
-	Policies *pProp = &pStrategy->proposal;
+	Policies *pPol = &pStrategy->proposal;
 	Consequences *pEst = &pStrategy->estimations;
 
-	pEst->leisure_l = 1 / (2 - pProp->rateTax_r);
+	pEst->leisure_l = 1 / (2 - pPol->rateTax_r);
 	pEst->effort_e = 1 - pEst->leisure_l;
-	pEst->activityReturns_y = (1 - pProp->rateTax_r) * pEst->effort_e;
-	pEst->payoffDisenfranchized = utility(pProp->goodsPublic_x, 0, pEst->activityReturns_y, pEst->leisure_l);
+	pEst->activityReturns_y = (1 - pPol->rateTax_r) * pEst->effort_e;
+	pEst->payoffDisenfranchized = utility(pPol->goodsPublic_x, 0, pEst->activityReturns_y, pEst->leisure_l);
 
 	pEst->activityEconomic_E = mNumCitizen_N * pEst->effort_e;
-	pEst->revenuesGov_R = pProp->rateTax_r * pEst->activityEconomic_E;
-	pEst->costsGov_M = pProp->goodsPublic_x * mCostPublic +
-					pProp->goodsPrivate_g * pStrategy->coalition.size();
+	pEst->revenuesGov_R = pPol->rateTax_r * pEst->activityEconomic_E;
+	pEst->costsGov_M = pPol->goodsPublic_x * mCostPublic +
+					pPol->goodsPrivate_g * pStrategy->coalition.size();
 
 	procInfLog("    Effort                   %10.3f", pEst->effort_e);
 	procInfLog("    Economic activity        %10.3f", pEst->activityEconomic_E);
@@ -236,19 +248,92 @@ void ChapThreeModeling::consequencesCalc(Strategy *pStrategy)
 	procInfLog("    Government costs         %10.3f", pEst->costsGov_M);
 }
 
-void ChapThreeModeling::newLeaderVote()
+void ChapThreeModeling::newIncumbentVote()
 {
 	vector<Selector>::iterator iSel;
-	//double contVal;
+	bool ok;
+	uint16_t cntForIncumbent = 0;
+	uint16_t cntForChallenger = 0;
 
 	iSel = mSelectors.begin();
 	for (; iSel != mSelectors.end(); ++iSel)
 	{
-		procInfLog("Selector %2u: %c, %c",
-					iSel->id,
-					iSel->chosenByLeader ? 'L' : '-',
-					iSel->chosenByChallenger ? 'C' : '-');
+		ok = challengerAccept(&(*iSel));
+		if (ok)
+			++cntForChallenger;
+		else
+			++cntForIncumbent;
 	}
+
+	if (cntForIncumbent >= mNumWinning_W or cntForChallenger < mNumWinning_W)
+	{
+		procInfLog("\033[1;32mIncumbent stays in office\033[0m");
+		return;
+	}
+
+	procInfLog("\033[1;33mChallenger takes office\033[0m");
+
+	mpIncumbent = mpChallenger;
+	mpChallenger = NULL;
+
+	iSel = mSelectors.begin();
+	for (; iSel != mSelectors.end(); ++iSel)
+	{
+		if (!iSel->chosenByChallenger)
+			continue;
+
+		iSel->chosenByChallenger = false;
+		iSel->chosenByIncumbent = true;
+	}
+}
+
+bool ChapThreeModeling::challengerAccept(Selector *pSel)
+{
+	if (!pSel)
+		return false;
+
+	if (!mpIncumbent)
+		return true;
+
+	Policies *pPolIncumbent = &mStrategyIncumbent.proposal;
+	Policies *pPolChallenger = &mStrategyChallenger.proposal;
+	Consequences *pConIncumbent = &mStrategyIncumbent.estimations;
+	Consequences *pConChallenger = &mStrategyChallenger.estimations;
+	double payoffReservation_v0 = 0.0;
+	double utilityFromIncumbent_VL = utility(
+				pPolIncumbent->goodsPublic_x,
+				pSel->chosenByIncumbent ? pPolIncumbent->goodsPrivate_g : 0,
+				pConIncumbent->activityReturns_y,
+				pConIncumbent->leisure_l);
+	double utilityFromChallenger_VC = utility(
+				pPolChallenger->goodsPublic_x,
+				pPolChallenger->goodsPrivate_g,
+				pConChallenger->activityReturns_y,
+				pConChallenger->leisure_l);
+	double continuationFromIncumbent_ZL = continuationValue(&mStrategyIncumbent, pSel);
+	double continuationFromChallenger_ZC = continuationValue(&mStrategyChallenger, pSel);
+	bool feasableIncumbent = pConIncumbent->revenuesGov_R > pConIncumbent->costsGov_M;
+	bool feasableChallenger = pConChallenger->revenuesGov_R > pConChallenger->costsGov_M;
+	double payoffFromIncumbent;
+	double payoffFromChallenger;
+	bool ok = false;
+
+	payoffFromIncumbent = feasableIncumbent ? utilityFromIncumbent_VL : payoffReservation_v0 +
+						mDelta * continuationFromIncumbent_ZL;
+	payoffFromChallenger = feasableChallenger ? utilityFromChallenger_VC : payoffReservation_v0 +
+						mDelta * continuationFromChallenger_ZC;
+
+	ok = payoffFromChallenger > payoffFromIncumbent;
+
+	procInfLog("Selector %2u, %c%c: UL=%6.3f, UC=%6.3f => %c",
+				pSel->id,
+				payoffFromIncumbent,
+				payoffFromChallenger,
+				pSel->chosenByIncumbent ? 'L' : '-',
+				pSel->chosenByChallenger ? 'C' : '-',
+				ok ? 'C' : 'L');
+
+	return ok;
 }
 
 double ChapThreeModeling::continuationValue(Strategy *pStrategy, Selector *pSel)
@@ -259,27 +344,41 @@ double ChapThreeModeling::continuationValue(Strategy *pStrategy, Selector *pSel)
 		return 0.0;
 	}
 
-	bool isLeader = pStrategy == &mStrategyLeader;
+	Policies *pPol = &pStrategy->proposal;
+	Consequences *pCon= &pStrategy->estimations;
 
-	Policies *pProp = &pStrategy->proposal;
+	bool forIncumbent = pStrategy == &mStrategyIncumbent;
+	double util;
 
-	double leisure = 1 / (2 - pProp->rateTax_r);
-	double effort = 1 - leisure;
-	double activityReturns = (1 - pProp->rateTax_r) * effort;
-	uint8_t numWinning = pStrategy->coalition.size();
-	double loyaltyNorm = (double)numWinning / mNumSelectorate_S;
+	if (forIncumbent)
+	{
+		util = utility(pPol->goodsPublic_x,
+					pSel->chosenByIncumbent ? pPol->goodsPrivate_g : 0,
+					pCon->activityReturns_y,
+					pCon->leisure_l);
 
-	if (isLeader)
-		return utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) / (1 - mDelta);
+		util /= 1 - mDelta;
+		return util;
+	}
 
-	return (utility(pProp->goodsPublic_x, pProp->goodsPrivate_g, activityReturns, leisure) * loyaltyNorm +
-			utility(pProp->goodsPublic_x, 0, activityReturns, leisure) * (1 - loyaltyNorm)) / (1 - mDelta);
+	util = utility(pPol->goodsPublic_x,
+				pPol->goodsPrivate_g,
+				pCon->activityReturns_y,
+				pCon->leisure_l) * mLoyaltyNorm;
+
+	util += utility(pPol->goodsPublic_x,
+				0,
+				pCon->activityReturns_y,
+				pCon->leisure_l) * (1 - mLoyaltyNorm);
+
+	util /= 1 - mDelta;
+	return util;
 }
 
 void ChapThreeModeling::lawEnact()
 {
-	mpCoalition = &mStrategyLeader.coalition;
-	mpLaw = &mStrategyLeader.proposal;
+	mpCoalition = &mStrategyIncumbent.coalition;
+	mpLaw = &mStrategyIncumbent.proposal;
 }
 
 void ChapThreeModeling::resultsDevelop()

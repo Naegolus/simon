@@ -69,7 +69,7 @@ private:
 	struct Selector
 	{
 		uint32_t id;
-		bool chosenByLeader;
+		bool chosenByIncumbent;
 		bool chosenByChallenger;
 	};
 
@@ -106,7 +106,8 @@ private:
 	void challengerSet();
 	void strategyRandomCreate(Strategy *pStrategy);
 	void consequencesCalc(Strategy *pStrategy);
-	void newLeaderVote();
+	void newIncumbentVote();
+	bool challengerAccept(Selector *pSel);
 	double continuationValue(Strategy *pStrategy, Selector *pSel);
 	void lawEnact();
 	void resultsDevelop();
@@ -122,11 +123,12 @@ private:
 
 	/* member variables */
 	//uint32_t mStartMs;
+	double mLoyaltyNorm;
 	std::mt19937 mRng;
 	std::vector<Selector> mSelectors;
-	Selector *mpLeader;
+	Selector *mpIncumbent;
 	Selector *mpChallenger;
-	Strategy mStrategyLeader;
+	Strategy mStrategyIncumbent;
 	Strategy mStrategyChallenger;
 	std::list<Selector *> *mpCoalition;
 	Policies *mpLaw;

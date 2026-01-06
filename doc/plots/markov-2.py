@@ -5,39 +5,48 @@ import argparse
 
 np.set_printoptions(formatter = {'float': '{:.3f}'.format})
 
-p_slow = np.array([0.40, 0.20, 0.40])
-p_fast = np.array([0.30, 0.50, 0.20])
+x = np.zeros((3, 1))
+
+A_slow = np.array([0.40, 0.20, 0.40])
+A_fast = np.array([0.30, 0.50, 0.20])
 
 nDef = 1
 
 def matrix_power(n):
 
-	P = np.column_stack([p_fast, np.zeros(3), np.zeros(3)])
-	P = np.column_stack([p_slow, np.zeros(3), np.zeros(3)])
-	P[1][1] = 1
-	P[0][2] = 2
+	x[0] = 1.00
+	print(f"x:")
+	print(x)
 
-	r = np.linalg.matrix_power(P, n)
+	A = np.column_stack([A_fast, np.zeros(3), np.zeros(3)])
+	A = np.column_stack([A_slow, np.zeros(3), np.zeros(3)])
+	A[1][1] = 1
+	A[0][2] = 2
 
-	print(f"P:")
-	print(P)
+	print(f"A:")
+	print(A)
 
-	print(f"R = P^{n}:")
-	print(r)
-
-	sums = np.sum(r, axis = 0)
-	print(f"Sums:")
+	sums = np.sum(A, axis = 0)
+	print(f"Sums A:")
 	print(f" {sums}")
 
-	d = np.diag(r)
-	print(f"d = diag(R): ")
-	print(f" {d}")
+	R = np.linalg.matrix_power(A, n)
+	print(f"R = A^{n}:")
+	print(R)
 
-	return r
+	sums = np.sum(R, axis = 0)
+	print(f"Sums R:")
+	print(f" {sums}")
+
+	xn = R @ x
+	print(f"xn = R * x:")
+	print(xn)
+
+	return xn
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description = 'Calculating P^n')
-	parser.add_argument('n', type = int, nargs = '?', default = nDef, help = f"Exponent for P^n (default: {nDef})")
+	parser = argparse.ArgumentParser(description = 'Calculating A^n')
+	parser.add_argument('n', type = int, nargs = '?', default = nDef, help = f"Exponent for A^n (default: {nDef})")
 
 	args = parser.parse_args()
 	matrix_power(args.n)
